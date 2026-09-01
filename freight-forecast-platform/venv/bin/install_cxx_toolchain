@@ -1,0 +1,6 @@
+#!/Users/apple/Documents/FreightPredicter/freight-forecast-platform/venv/bin/python3.12
+import sys
+from cmdstanpy.install_cxx_toolchain import __main__
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(__main__())
