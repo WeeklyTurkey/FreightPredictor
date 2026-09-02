@@ -1,5 +1,6 @@
-Django
-djangorestframework
-pandas
-prophet
-APScheduler
+Django>=4.2,<6.2
+djangorestframework>=3.14
+django-cors-headers>=4.0
+pandas>=2.0
+prophet>=1.1
+numpy>=1.24

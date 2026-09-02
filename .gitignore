@@ -1,5 +1,6 @@
 .venv/
 venv/
-*.pyc
+*.py[cod]
 __pycache__/
-db.sqlite3
+**/__pycache__/**
+# db.sqlite3 (included per user request)

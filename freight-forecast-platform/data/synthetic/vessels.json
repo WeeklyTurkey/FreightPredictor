@@ -1,0 +1,28 @@
+{
+  "vessels": [
+    {
+      "size_class": "supramax",
+      "min_dwt": 50000,
+      "max_dwt": 65000,
+      "typical_draft": 12.2,
+      "typical_beam": 32.2,
+      "typical_loa": 190.0
+    },
+    {
+      "size_class": "panamax",
+      "min_dwt": 70000,
+      "max_dwt": 85000,
+      "typical_draft": 13.5,
+      "typical_beam": 32.3,
+      "typical_loa": 225.0
+    },
+    {
+      "size_class": "capesize",
+      "min_dwt": 100000,
+      "max_dwt": 200000,
+      "typical_draft": 17.0,
+      "typical_beam": 46.0,
+      "typical_loa": 290.0
+    }
+  ]
+}

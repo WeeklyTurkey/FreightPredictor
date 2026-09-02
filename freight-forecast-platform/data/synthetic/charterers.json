@@ -1,0 +1,154 @@
+{
+  "charterers": [
+    {
+      "name": "Pacific Bulk Carriers",
+      "country": "Singapore",
+      "contact_email": "charter@pacificbulkcarriers.com",
+      "on_time_delivery_pct": 62.0,
+      "cargo_damage_incidents": 3,
+      "payment_reliability_pct": 58.9,
+      "total_voyages": 322,
+      "years_in_operation": 9
+    },
+    {
+      "name": "Atlantic Maritime Corp",
+      "country": "United Kingdom",
+      "contact_email": "charter@atlanticmaritimecorp.com",
+      "on_time_delivery_pct": 92.7,
+      "cargo_damage_incidents": 3,
+      "payment_reliability_pct": 94.4,
+      "total_voyages": 599,
+      "years_in_operation": 24
+    },
+    {
+      "name": "Indo Shipping Lines",
+      "country": "India",
+      "contact_email": "charter@indoshippinglines.com",
+      "on_time_delivery_pct": 73.3,
+      "cargo_damage_incidents": 1,
+      "payment_reliability_pct": 57.3,
+      "total_voyages": 395,
+      "years_in_operation": 24
+    },
+    {
+      "name": "Dragon Logistics",
+      "country": "China",
+      "contact_email": "charter@dragonlogistics.com",
+      "on_time_delivery_pct": 87.4,
+      "cargo_damage_incidents": 3,
+      "payment_reliability_pct": 62.4,
+      "total_voyages": 139,
+      "years_in_operation": 27
+    },
+    {
+      "name": "Cape Horn Shipping",
+      "country": "Norway",
+      "contact_email": "charter@capehornshipping.com",
+      "on_time_delivery_pct": 62.7,
+      "cargo_damage_incidents": 3,
+      "payment_reliability_pct": 69.2,
+      "total_voyages": 154,
+      "years_in_operation": 5
+    },
+    {
+      "name": "Southern Cross Maritime",
+      "country": "Australia",
+      "contact_email": "charter@southerncrossmaritime.com",
+      "on_time_delivery_pct": 63.6,
+      "cargo_damage_incidents": 6,
+      "payment_reliability_pct": 61.4,
+      "total_voyages": 71,
+      "years_in_operation": 21
+    },
+    {
+      "name": "Blue Ocean Chartering",
+      "country": "Greece",
+      "contact_email": "charter@blueoceanchartering.com",
+      "on_time_delivery_pct": 95.5,
+      "cargo_damage_incidents": 2,
+      "payment_reliability_pct": 80.8,
+      "total_voyages": 530,
+      "years_in_operation": 5
+    },
+    {
+      "name": "Global Freight Partners",
+      "country": "Germany",
+      "contact_email": "charter@globalfreightpartners.com",
+      "on_time_delivery_pct": 90.0,
+      "cargo_damage_incidents": 6,
+      "payment_reliability_pct": 70.5,
+      "total_voyages": 544,
+      "years_in_operation": 16
+    },
+    {
+      "name": "Oceanic Transport Ltd",
+      "country": "Japan",
+      "contact_email": "charter@oceanictransportltd.com",
+      "on_time_delivery_pct": 92.0,
+      "cargo_damage_incidents": 4,
+      "payment_reliability_pct": 83.7,
+      "total_voyages": 372,
+      "years_in_operation": 3
+    },
+    {
+      "name": "Bay of Bengal Shipping",
+      "country": "India",
+      "contact_email": "charter@bayofbengalshipping.com",
+      "on_time_delivery_pct": 75.5,
+      "cargo_damage_incidents": 4,
+      "payment_reliability_pct": 89.6,
+      "total_voyages": 494,
+      "years_in_operation": 34
+    },
+    {
+      "name": "TransPacific Cargo",
+      "country": "South Korea",
+      "contact_email": "charter@transpacificcargo.com",
+      "on_time_delivery_pct": 80.3,
+      "cargo_damage_incidents": 4,
+      "payment_reliability_pct": 73.9,
+      "total_voyages": 82,
+      "years_in_operation": 14
+    },
+    {
+      "name": "Meridian Bulk Services",
+      "country": "Netherlands",
+      "contact_email": "charter@meridianbulkservices.com",
+      "on_time_delivery_pct": 88.3,
+      "cargo_damage_incidents": 3,
+      "payment_reliability_pct": 58.7,
+      "total_voyages": 723,
+      "years_in_operation": 19
+    },
+    {
+      "name": "Eastern Seas Navigation",
+      "country": "UAE",
+      "contact_email": "charter@easternseasnavigation.com",
+      "on_time_delivery_pct": 66.6,
+      "cargo_damage_incidents": 3,
+      "payment_reliability_pct": 70.2,
+      "total_voyages": 125,
+      "years_in_operation": 32
+    },
+    {
+      "name": "Continental Carriers",
+      "country": "USA",
+      "contact_email": "charter@continentalcarriers.com",
+      "on_time_delivery_pct": 75.1,
+      "cargo_damage_incidents": 0,
+      "payment_reliability_pct": 90.0,
+      "total_voyages": 243,
+      "years_in_operation": 8
+    },
+    {
+      "name": "Monsoon Maritime",
+      "country": "India",
+      "contact_email": "charter@monsoonmaritime.com",
+      "on_time_delivery_pct": 92.4,
+      "cargo_damage_incidents": 2,
+      "payment_reliability_pct": 71.4,
+      "total_voyages": 284,
+      "years_in_operation": 28
+    }
+  ]
+}

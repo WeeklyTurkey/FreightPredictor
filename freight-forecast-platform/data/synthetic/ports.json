@@ -1,0 +1,84 @@
+{
+  "ports": [
+    {
+      "name": "Newcastle",
+      "country": "Australia",
+      "port_type": "origin",
+      "max_draft": 15.2,
+      "max_beam": 50.0,
+      "max_loa": 300.0,
+      "ships_currently_at_port": 0,
+      "expected_incoming_shipments": 0
+    },
+    {
+      "name": "Richards Bay",
+      "country": "South Africa",
+      "port_type": "origin",
+      "max_draft": 17.5,
+      "max_beam": 50.0,
+      "max_loa": 350.0,
+      "ships_currently_at_port": 0,
+      "expected_incoming_shipments": 0
+    },
+    {
+      "name": "Kalimantan",
+      "country": "Indonesia",
+      "port_type": "origin",
+      "max_draft": 14.0,
+      "max_beam": 45.0,
+      "max_loa": 280.0,
+      "ships_currently_at_port": 0,
+      "expected_incoming_shipments": 0
+    },
+    {
+      "name": "Baltimore",
+      "country": "USA",
+      "port_type": "origin",
+      "max_draft": 15.5,
+      "max_beam": 48.0,
+      "max_loa": 305.0,
+      "ships_currently_at_port": 0,
+      "expected_incoming_shipments": 0
+    },
+    {
+      "name": "Haldia",
+      "country": "India",
+      "port_type": "destination",
+      "max_draft": 7.5,
+      "max_beam": 36.0,
+      "max_loa": 220.0,
+      "ships_currently_at_port": 13,
+      "expected_incoming_shipments": 8
+    },
+    {
+      "name": "Paradip",
+      "country": "India",
+      "port_type": "destination",
+      "max_draft": 14.5,
+      "max_beam": 45.0,
+      "max_loa": 280.0,
+      "ships_currently_at_port": 20,
+      "expected_incoming_shipments": 6
+    },
+    {
+      "name": "Visakhapatnam",
+      "country": "India",
+      "port_type": "destination",
+      "max_draft": 16.5,
+      "max_beam": 48.0,
+      "max_loa": 300.0,
+      "ships_currently_at_port": 18,
+      "expected_incoming_shipments": 7
+    },
+    {
+      "name": "Chennai",
+      "country": "India",
+      "port_type": "destination",
+      "max_draft": 12.0,
+      "max_beam": 42.0,
+      "max_loa": 260.0,
+      "ships_currently_at_port": 17,
+      "expected_incoming_shipments": 10
+    }
+  ]
+}
