@@ -17,7 +17,7 @@ A full-stack prototype that forecasts freight/charter rates, recommends optimal 
 ### 1. Backend Setup (Django)
 
 ```bash
-cd FrieghtCast/FreightPredictor/freight-forecast-platform
+cd backend
 
 # Create & Activate Virtual Environment
 python -m venv .venv
@@ -43,7 +43,7 @@ python manage.py runserver
 Open a new terminal window:
 
 ```bash
-cd FrieghtCast/Freightcast
+cd frontend
 
 # Install Dependencies
 npm install
@@ -92,7 +92,7 @@ The platform consists of a modern React SPA on the frontend and a Django REST Fr
 ```
 FreightPredictor_integrated/
 │
-├── FrieghtCast/Freightcast/                   # Frontend React Application
+├── frontend/                                  # Frontend React Application
 │   ├── src/
 │   │   ├── api/freightService.js              # Centralized Axios API Service
 │   │   ├── components/                        # Reusable UI components
@@ -100,7 +100,7 @@ FreightPredictor_integrated/
 │   │   └── App.jsx                            # React Router integration
 │   └── package.json
 │
-└── FrieghtCast/FreightPredictor/freight-forecast-platform/ # Backend Django Application
+└── backend/                                   # Backend Django Application
     ├── app/
     │   ├── models.py                          # 10 DB Models (Routes, Rates, Forecasts, etc.)
     │   ├── views.py                           # DRF ViewSets & Action APIs
