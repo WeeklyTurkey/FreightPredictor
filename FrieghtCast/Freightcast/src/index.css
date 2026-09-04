@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  body {
+    background-color: #f0f4f8;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(170, 39%, 85%, 0.7) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, hsla(250, 40%, 88%, 0.7) 0, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(190, 40%, 85%, 0.7) 0, transparent 50%);
+    background-attachment: fixed;
+    @apply text-slate-800 antialiased min-h-screen;
+  }
+}
+
+@layer components {
+  /* Clean card with subtle shadow and glassmorphism */
+  .card {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 0.875rem;
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .card-hover {
+    transition: all 0.2s ease;
+  }
+  .card-hover:hover {
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary {
+    @apply bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-sm;
+  }
+  .btn-secondary {
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
+  .input-field {
+    @apply bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-lg px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 focus:bg-white/90 transition-all duration-200;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+/* Custom scrollbar — subtle */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Recharts light theme overrides */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: #f0f0f5;
+}
+.recharts-text {
+  fill: #8a8aa3;
+}
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+/* Glassmorphism Overrides */
+/* The templates have solid backgrounds hardcoded. We override them here to let the glass effect work without touching the components. */
+.bg-\[\#f8f9fb\] {
+  background-color: transparent !important;
+}
+
+.card .bg-white {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(8px);
+}
+
+.card .bg-slate-50 {
+  background-color: rgba(248, 250, 252, 0.4) !important;
+  backdrop-filter: blur(8px);
+}
+
+.card .bg-emerald-50 {
+  background-color: rgba(236, 253, 245, 0.4) !important;
+}
+
+.card .bg-amber-50 {
+  background-color: rgba(255, 251, 235, 0.4) !important;
+}
+
+.card .bg-teal-50 {
+  background-color: rgba(240, 253, 250, 0.4) !important;
+}
+
+.card .bg-rose-50 {
+  background-color: rgba(255, 241, 242, 0.4) !important;
+}

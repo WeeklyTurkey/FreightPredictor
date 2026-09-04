@@ -1,0 +1,2200 @@
+{
+  "factors": [
+    {
+      "date": "2025-09-04",
+      "bunker_fuel_price_usd": 466.55,
+      "port_congestion_index": 48.96,
+      "seasonal_weather_impact": 5.27
+    },
+    {
+      "date": "2025-09-05",
+      "bunker_fuel_price_usd": 477.16,
+      "port_congestion_index": 51.65,
+      "seasonal_weather_impact": 4.04
+    },
+    {
+      "date": "2025-09-06",
+      "bunker_fuel_price_usd": 474.77,
+      "port_congestion_index": 54.3,
+      "seasonal_weather_impact": 4.46
+    },
+    {
+      "date": "2025-09-07",
+      "bunker_fuel_price_usd": 454.32,
+      "port_congestion_index": 52.35,
+      "seasonal_weather_impact": 4.11
+    },
+    {
+      "date": "2025-09-08",
+      "bunker_fuel_price_usd": 448.1,
+      "port_congestion_index": 54.33,
+      "seasonal_weather_impact": 4.49
+    },
+    {
+      "date": "2025-09-09",
+      "bunker_fuel_price_usd": 439.79,
+      "port_congestion_index": 50.19,
+      "seasonal_weather_impact": 4.39
+    },
+    {
+      "date": "2025-09-10",
+      "bunker_fuel_price_usd": 438.24,
+      "port_congestion_index": 49.55,
+      "seasonal_weather_impact": 4.58
+    },
+    {
+      "date": "2025-09-11",
+      "bunker_fuel_price_usd": 450.66,
+      "port_congestion_index": 44.38,
+      "seasonal_weather_impact": 4.03
+    },
+    {
+      "date": "2025-09-12",
+      "bunker_fuel_price_usd": 456.15,
+      "port_congestion_index": 45.08,
+      "seasonal_weather_impact": 3.56
+    },
+    {
+      "date": "2025-09-13",
+      "bunker_fuel_price_usd": 455.99,
+      "port_congestion_index": 46.81,
+      "seasonal_weather_impact": 5.14
+    },
+    {
+      "date": "2025-09-14",
+      "bunker_fuel_price_usd": 450.21,
+      "port_congestion_index": 48.17,
+      "seasonal_weather_impact": 4.4
+    },
+    {
+      "date": "2025-09-15",
+      "bunker_fuel_price_usd": 446.87,
+      "port_congestion_index": 50.54,
+      "seasonal_weather_impact": 4.06
+    },
+    {
+      "date": "2025-09-16",
+      "bunker_fuel_price_usd": 443.37,
+      "port_congestion_index": 52.08,
+      "seasonal_weather_impact": 3.24
+    },
+    {
+      "date": "2025-09-17",
+      "bunker_fuel_price_usd": 446.44,
+      "port_congestion_index": 52.77,
+      "seasonal_weather_impact": 4.75
+    },
+    {
+      "date": "2025-09-18",
+      "bunker_fuel_price_usd": 440.13,
+      "port_congestion_index": 53.7,
+      "seasonal_weather_impact": 4.61
+    },
+    {
+      "date": "2025-09-19",
+      "bunker_fuel_price_usd": 449.17,
+      "port_congestion_index": 50.79,
+      "seasonal_weather_impact": 4.31
+    },
+    {
+      "date": "2025-09-20",
+      "bunker_fuel_price_usd": 446.13,
+      "port_congestion_index": 49.93,
+      "seasonal_weather_impact": 4.41
+    },
+    {
+      "date": "2025-09-21",
+      "bunker_fuel_price_usd": 430.79,
+      "port_congestion_index": 49.78,
+      "seasonal_weather_impact": 4.84
+    },
+    {
+      "date": "2025-09-22",
+      "bunker_fuel_price_usd": 428.66,
+      "port_congestion_index": 47.39,
+      "seasonal_weather_impact": 3.84
+    },
+    {
+      "date": "2025-09-23",
+      "bunker_fuel_price_usd": 431.99,
+      "port_congestion_index": 44.57,
+      "seasonal_weather_impact": 4.1
+    },
+    {
+      "date": "2025-09-24",
+      "bunker_fuel_price_usd": 422.85,
+      "port_congestion_index": 44.85,
+      "seasonal_weather_impact": 3.52
+    },
+    {
+      "date": "2025-09-25",
+      "bunker_fuel_price_usd": 421.61,
+      "port_congestion_index": 45.46,
+      "seasonal_weather_impact": 4.35
+    },
+    {
+      "date": "2025-09-26",
+      "bunker_fuel_price_usd": 416.73,
+      "port_congestion_index": 45.78,
+      "seasonal_weather_impact": 3.43
+    },
+    {
+      "date": "2025-09-27",
+      "bunker_fuel_price_usd": 438.67,
+      "port_congestion_index": 47.25,
+      "seasonal_weather_impact": 2.85
+    },
+    {
+      "date": "2025-09-28",
+      "bunker_fuel_price_usd": 433.55,
+      "port_congestion_index": 49.71,
+      "seasonal_weather_impact": 3.38
+    },
+    {
+      "date": "2025-09-29",
+      "bunker_fuel_price_usd": 423.68,
+      "port_congestion_index": 49.2,
+      "seasonal_weather_impact": 3.41
+    },
+    {
+      "date": "2025-09-30",
+      "bunker_fuel_price_usd": 422.43,
+      "port_congestion_index": 47.25,
+      "seasonal_weather_impact": 3.17
+    },
+    {
+      "date": "2025-10-01",
+      "bunker_fuel_price_usd": 431.13,
+      "port_congestion_index": 50.16,
+      "seasonal_weather_impact": 3.25
+    },
+    {
+      "date": "2025-10-02",
+      "bunker_fuel_price_usd": 427.81,
+      "port_congestion_index": 48.53,
+      "seasonal_weather_impact": 3.71
+    },
+    {
+      "date": "2025-10-03",
+      "bunker_fuel_price_usd": 425.57,
+      "port_congestion_index": 44.14,
+      "seasonal_weather_impact": 3.12
+    },
+    {
+      "date": "2025-10-04",
+      "bunker_fuel_price_usd": 422.84,
+      "port_congestion_index": 41.05,
+      "seasonal_weather_impact": 3.22
+    },
+    {
+      "date": "2025-10-05",
+      "bunker_fuel_price_usd": 421.92,
+      "port_congestion_index": 44.87,
+      "seasonal_weather_impact": 3.15
+    },
+    {
+      "date": "2025-10-06",
+      "bunker_fuel_price_usd": 416.86,
+      "port_congestion_index": 43.58,
+      "seasonal_weather_impact": 2.45
+    },
+    {
+      "date": "2025-10-07",
+      "bunker_fuel_price_usd": 418.29,
+      "port_congestion_index": 42.27,
+      "seasonal_weather_impact": 3.24
+    },
+    {
+      "date": "2025-10-08",
+      "bunker_fuel_price_usd": 423.66,
+      "port_congestion_index": 48.03,
+      "seasonal_weather_impact": 3.23
+    },
+    {
+      "date": "2025-10-09",
+      "bunker_fuel_price_usd": 432.91,
+      "port_congestion_index": 47.52,
+      "seasonal_weather_impact": 2.67
+    },
+    {
+      "date": "2025-10-10",
+      "bunker_fuel_price_usd": 436.14,
+      "port_congestion_index": 44.33,
+      "seasonal_weather_impact": 3.28
+    },
+    {
+      "date": "2025-10-11",
+      "bunker_fuel_price_usd": 434.37,
+      "port_congestion_index": 41.79,
+      "seasonal_weather_impact": 3.13
+    },
+    {
+      "date": "2025-10-12",
+      "bunker_fuel_price_usd": 433.15,
+      "port_congestion_index": 44.92,
+      "seasonal_weather_impact": 2.42
+    },
+    {
+      "date": "2025-10-13",
+      "bunker_fuel_price_usd": 436.69,
+      "port_congestion_index": 46.72,
+      "seasonal_weather_impact": 2.49
+    },
+    {
+      "date": "2025-10-14",
+      "bunker_fuel_price_usd": 449.19,
+      "port_congestion_index": 48.45,
+      "seasonal_weather_impact": 2.67
+    },
+    {
+      "date": "2025-10-15",
+      "bunker_fuel_price_usd": 449.91,
+      "port_congestion_index": 48.59,
+      "seasonal_weather_impact": 1.92
+    },
+    {
+      "date": "2025-10-16",
+      "bunker_fuel_price_usd": 441.59,
+      "port_congestion_index": 44.0,
+      "seasonal_weather_impact": 2.56
+    },
+    {
+      "date": "2025-10-17",
+      "bunker_fuel_price_usd": 456.8,
+      "port_congestion_index": 40.11,
+      "seasonal_weather_impact": 3.38
+    },
+    {
+      "date": "2025-10-18",
+      "bunker_fuel_price_usd": 466.97,
+      "port_congestion_index": 40.07,
+      "seasonal_weather_impact": 1.87
+    },
+    {
+      "date": "2025-10-19",
+      "bunker_fuel_price_usd": 473.12,
+      "port_congestion_index": 39.39,
+      "seasonal_weather_impact": 1.96
+    },
+    {
+      "date": "2025-10-20",
+      "bunker_fuel_price_usd": 479.66,
+      "port_congestion_index": 40.77,
+      "seasonal_weather_impact": 2.46
+    },
+    {
+      "date": "2025-10-21",
+      "bunker_fuel_price_usd": 478.45,
+      "port_congestion_index": 35.15,
+      "seasonal_weather_impact": 3.05
+    },
+    {
+      "date": "2025-10-22",
+      "bunker_fuel_price_usd": 477.09,
+      "port_congestion_index": 32.87,
+      "seasonal_weather_impact": 2.84
+    },
+    {
+      "date": "2025-10-23",
+      "bunker_fuel_price_usd": 484.94,
+      "port_congestion_index": 31.03,
+      "seasonal_weather_impact": 2.09
+    },
+    {
+      "date": "2025-10-24",
+      "bunker_fuel_price_usd": 460.28,
+      "port_congestion_index": 30.1,
+      "seasonal_weather_impact": 1.95
+    },
+    {
+      "date": "2025-10-25",
+      "bunker_fuel_price_usd": 452.18,
+      "port_congestion_index": 33.25,
+      "seasonal_weather_impact": 2.5
+    },
+    {
+      "date": "2025-10-26",
+      "bunker_fuel_price_usd": 472.59,
+      "port_congestion_index": 34.34,
+      "seasonal_weather_impact": 1.56
+    },
+    {
+      "date": "2025-10-27",
+      "bunker_fuel_price_usd": 471.43,
+      "port_congestion_index": 33.97,
+      "seasonal_weather_impact": 2.07
+    },
+    {
+      "date": "2025-10-28",
+      "bunker_fuel_price_usd": 476.8,
+      "port_congestion_index": 29.78,
+      "seasonal_weather_impact": 3.15
+    },
+    {
+      "date": "2025-10-29",
+      "bunker_fuel_price_usd": 484.56,
+      "port_congestion_index": 35.86,
+      "seasonal_weather_impact": 0.98
+    },
+    {
+      "date": "2025-10-30",
+      "bunker_fuel_price_usd": 499.42,
+      "port_congestion_index": 39.52,
+      "seasonal_weather_impact": 2.14
+    },
+    {
+      "date": "2025-10-31",
+      "bunker_fuel_price_usd": 493.4,
+      "port_congestion_index": 43.48,
+      "seasonal_weather_impact": 2.39
+    },
+    {
+      "date": "2025-11-01",
+      "bunker_fuel_price_usd": 502.71,
+      "port_congestion_index": 44.93,
+      "seasonal_weather_impact": 2.17
+    },
+    {
+      "date": "2025-11-02",
+      "bunker_fuel_price_usd": 495.15,
+      "port_congestion_index": 43.38,
+      "seasonal_weather_impact": 2.41
+    },
+    {
+      "date": "2025-11-03",
+      "bunker_fuel_price_usd": 497.32,
+      "port_congestion_index": 44.09,
+      "seasonal_weather_impact": 1.07
+    },
+    {
+      "date": "2025-11-04",
+      "bunker_fuel_price_usd": 491.5,
+      "port_congestion_index": 45.5,
+      "seasonal_weather_impact": 1.87
+    },
+    {
+      "date": "2025-11-05",
+      "bunker_fuel_price_usd": 486.67,
+      "port_congestion_index": 50.72,
+      "seasonal_weather_impact": 1.63
+    },
+    {
+      "date": "2025-11-06",
+      "bunker_fuel_price_usd": 499.88,
+      "port_congestion_index": 56.26,
+      "seasonal_weather_impact": 1.45
+    },
+    {
+      "date": "2025-11-07",
+      "bunker_fuel_price_usd": 490.71,
+      "port_congestion_index": 52.84,
+      "seasonal_weather_impact": 1.95
+    },
+    {
+      "date": "2025-11-08",
+      "bunker_fuel_price_usd": 487.26,
+      "port_congestion_index": 50.32,
+      "seasonal_weather_impact": 2.44
+    },
+    {
+      "date": "2025-11-09",
+      "bunker_fuel_price_usd": 473.69,
+      "port_congestion_index": 51.02,
+      "seasonal_weather_impact": 2.5
+    },
+    {
+      "date": "2025-11-10",
+      "bunker_fuel_price_usd": 471.65,
+      "port_congestion_index": 46.96,
+      "seasonal_weather_impact": 1.25
+    },
+    {
+      "date": "2025-11-11",
+      "bunker_fuel_price_usd": 474.92,
+      "port_congestion_index": 46.36,
+      "seasonal_weather_impact": 2.49
+    },
+    {
+      "date": "2025-11-12",
+      "bunker_fuel_price_usd": 479.08,
+      "port_congestion_index": 49.01,
+      "seasonal_weather_impact": 1.03
+    },
+    {
+      "date": "2025-11-13",
+      "bunker_fuel_price_usd": 473.01,
+      "port_congestion_index": 49.65,
+      "seasonal_weather_impact": 2.36
+    },
+    {
+      "date": "2025-11-14",
+      "bunker_fuel_price_usd": 471.77,
+      "port_congestion_index": 54.04,
+      "seasonal_weather_impact": 1.49
+    },
+    {
+      "date": "2025-11-15",
+      "bunker_fuel_price_usd": 475.3,
+      "port_congestion_index": 52.32,
+      "seasonal_weather_impact": 1.48
+    },
+    {
+      "date": "2025-11-16",
+      "bunker_fuel_price_usd": 471.76,
+      "port_congestion_index": 50.8,
+      "seasonal_weather_impact": 1.98
+    },
+    {
+      "date": "2025-11-17",
+      "bunker_fuel_price_usd": 446.66,
+      "port_congestion_index": 49.41,
+      "seasonal_weather_impact": 1.3
+    },
+    {
+      "date": "2025-11-18",
+      "bunker_fuel_price_usd": 443.88,
+      "port_congestion_index": 50.91,
+      "seasonal_weather_impact": 0.63
+    },
+    {
+      "date": "2025-11-19",
+      "bunker_fuel_price_usd": 452.88,
+      "port_congestion_index": 44.76,
+      "seasonal_weather_impact": 1.53
+    },
+    {
+      "date": "2025-11-20",
+      "bunker_fuel_price_usd": 443.4,
+      "port_congestion_index": 44.25,
+      "seasonal_weather_impact": 1.24
+    },
+    {
+      "date": "2025-11-21",
+      "bunker_fuel_price_usd": 437.63,
+      "port_congestion_index": 46.43,
+      "seasonal_weather_impact": 1.34
+    },
+    {
+      "date": "2025-11-22",
+      "bunker_fuel_price_usd": 434.79,
+      "port_congestion_index": 47.04,
+      "seasonal_weather_impact": 1.69
+    },
+    {
+      "date": "2025-11-23",
+      "bunker_fuel_price_usd": 437.56,
+      "port_congestion_index": 50.27,
+      "seasonal_weather_impact": 1.76
+    },
+    {
+      "date": "2025-11-24",
+      "bunker_fuel_price_usd": 437.28,
+      "port_congestion_index": 50.79,
+      "seasonal_weather_impact": 1.33
+    },
+    {
+      "date": "2025-11-25",
+      "bunker_fuel_price_usd": 437.06,
+      "port_congestion_index": 47.79,
+      "seasonal_weather_impact": 1.65
+    },
+    {
+      "date": "2025-11-26",
+      "bunker_fuel_price_usd": 436.57,
+      "port_congestion_index": 50.35,
+      "seasonal_weather_impact": 1.18
+    },
+    {
+      "date": "2025-11-27",
+      "bunker_fuel_price_usd": 454.95,
+      "port_congestion_index": 49.37,
+      "seasonal_weather_impact": 1.05
+    },
+    {
+      "date": "2025-11-28",
+      "bunker_fuel_price_usd": 456.98,
+      "port_congestion_index": 46.48,
+      "seasonal_weather_impact": 0.75
+    },
+    {
+      "date": "2025-11-29",
+      "bunker_fuel_price_usd": 454.08,
+      "port_congestion_index": 45.22,
+      "seasonal_weather_impact": 1.43
+    },
+    {
+      "date": "2025-11-30",
+      "bunker_fuel_price_usd": 447.83,
+      "port_congestion_index": 44.73,
+      "seasonal_weather_impact": 1.35
+    },
+    {
+      "date": "2025-12-01",
+      "bunker_fuel_price_usd": 456.48,
+      "port_congestion_index": 45.16,
+      "seasonal_weather_impact": 1.44
+    },
+    {
+      "date": "2025-12-02",
+      "bunker_fuel_price_usd": 461.58,
+      "port_congestion_index": 44.77,
+      "seasonal_weather_impact": 0.3
+    },
+    {
+      "date": "2025-12-03",
+      "bunker_fuel_price_usd": 456.21,
+      "port_congestion_index": 45.49,
+      "seasonal_weather_impact": 0.78
+    },
+    {
+      "date": "2025-12-04",
+      "bunker_fuel_price_usd": 450.55,
+      "port_congestion_index": 50.58,
+      "seasonal_weather_impact": 1.03
+    },
+    {
+      "date": "2025-12-05",
+      "bunker_fuel_price_usd": 454.54,
+      "port_congestion_index": 48.72,
+      "seasonal_weather_impact": 1.15
+    },
+    {
+      "date": "2025-12-06",
+      "bunker_fuel_price_usd": 446.2,
+      "port_congestion_index": 48.68,
+      "seasonal_weather_impact": 1.33
+    },
+    {
+      "date": "2025-12-07",
+      "bunker_fuel_price_usd": 434.65,
+      "port_congestion_index": 48.36,
+      "seasonal_weather_impact": 1.06
+    },
+    {
+      "date": "2025-12-08",
+      "bunker_fuel_price_usd": 438.25,
+      "port_congestion_index": 45.22,
+      "seasonal_weather_impact": 0.74
+    },
+    {
+      "date": "2025-12-09",
+      "bunker_fuel_price_usd": 435.48,
+      "port_congestion_index": 39.3,
+      "seasonal_weather_impact": 1.72
+    },
+    {
+      "date": "2025-12-10",
+      "bunker_fuel_price_usd": 454.12,
+      "port_congestion_index": 38.07,
+      "seasonal_weather_impact": 1.84
+    },
+    {
+      "date": "2025-12-11",
+      "bunker_fuel_price_usd": 455.42,
+      "port_congestion_index": 43.12,
+      "seasonal_weather_impact": 0.67
+    },
+    {
+      "date": "2025-12-12",
+      "bunker_fuel_price_usd": 463.26,
+      "port_congestion_index": 46.84,
+      "seasonal_weather_impact": 0.45
+    },
+    {
+      "date": "2025-12-13",
+      "bunker_fuel_price_usd": 464.29,
+      "port_congestion_index": 40.17,
+      "seasonal_weather_impact": 0.7
+    },
+    {
+      "date": "2025-12-14",
+      "bunker_fuel_price_usd": 467.54,
+      "port_congestion_index": 42.05,
+      "seasonal_weather_impact": 0.43
+    },
+    {
+      "date": "2025-12-15",
+      "bunker_fuel_price_usd": 464.4,
+      "port_congestion_index": 50.48,
+      "seasonal_weather_impact": 1.72
+    },
+    {
+      "date": "2025-12-16",
+      "bunker_fuel_price_usd": 455.55,
+      "port_congestion_index": 45.22,
+      "seasonal_weather_impact": 1.23
+    },
+    {
+      "date": "2025-12-17",
+      "bunker_fuel_price_usd": 450.24,
+      "port_congestion_index": 46.7,
+      "seasonal_weather_impact": 1.27
+    },
+    {
+      "date": "2025-12-18",
+      "bunker_fuel_price_usd": 440.22,
+      "port_congestion_index": 46.65,
+      "seasonal_weather_impact": 0.8
+    },
+    {
+      "date": "2025-12-19",
+      "bunker_fuel_price_usd": 431.99,
+      "port_congestion_index": 46.19,
+      "seasonal_weather_impact": 1.93
+    },
+    {
+      "date": "2025-12-20",
+      "bunker_fuel_price_usd": 435.88,
+      "port_congestion_index": 42.92,
+      "seasonal_weather_impact": 1.17
+    },
+    {
+      "date": "2025-12-21",
+      "bunker_fuel_price_usd": 426.04,
+      "port_congestion_index": 40.95,
+      "seasonal_weather_impact": 1.24
+    },
+    {
+      "date": "2025-12-22",
+      "bunker_fuel_price_usd": 429.76,
+      "port_congestion_index": 44.44,
+      "seasonal_weather_impact": 1.41
+    },
+    {
+      "date": "2025-12-23",
+      "bunker_fuel_price_usd": 435.71,
+      "port_congestion_index": 48.49,
+      "seasonal_weather_impact": 1.22
+    },
+    {
+      "date": "2025-12-24",
+      "bunker_fuel_price_usd": 422.86,
+      "port_congestion_index": 52.09,
+      "seasonal_weather_impact": 0.94
+    },
+    {
+      "date": "2025-12-25",
+      "bunker_fuel_price_usd": 412.65,
+      "port_congestion_index": 51.14,
+      "seasonal_weather_impact": 0.53
+    },
+    {
+      "date": "2025-12-26",
+      "bunker_fuel_price_usd": 406.76,
+      "port_congestion_index": 50.88,
+      "seasonal_weather_impact": 1.79
+    },
+    {
+      "date": "2025-12-27",
+      "bunker_fuel_price_usd": 407.4,
+      "port_congestion_index": 48.12,
+      "seasonal_weather_impact": 1.56
+    },
+    {
+      "date": "2025-12-28",
+      "bunker_fuel_price_usd": 413.61,
+      "port_congestion_index": 48.16,
+      "seasonal_weather_impact": 1.48
+    },
+    {
+      "date": "2025-12-29",
+      "bunker_fuel_price_usd": 423.74,
+      "port_congestion_index": 44.41,
+      "seasonal_weather_impact": 1.67
+    },
+    {
+      "date": "2025-12-30",
+      "bunker_fuel_price_usd": 420.7,
+      "port_congestion_index": 44.06,
+      "seasonal_weather_impact": 0.67
+    },
+    {
+      "date": "2025-12-31",
+      "bunker_fuel_price_usd": 413.57,
+      "port_congestion_index": 41.37,
+      "seasonal_weather_impact": 1.27
+    },
+    {
+      "date": "2026-01-01",
+      "bunker_fuel_price_usd": 424.41,
+      "port_congestion_index": 40.14,
+      "seasonal_weather_impact": 0.83
+    },
+    {
+      "date": "2026-01-02",
+      "bunker_fuel_price_usd": 425.7,
+      "port_congestion_index": 37.77,
+      "seasonal_weather_impact": 1.39
+    },
+    {
+      "date": "2026-01-03",
+      "bunker_fuel_price_usd": 421.58,
+      "port_congestion_index": 41.54,
+      "seasonal_weather_impact": 0.55
+    },
+    {
+      "date": "2026-01-04",
+      "bunker_fuel_price_usd": 419.91,
+      "port_congestion_index": 43.19,
+      "seasonal_weather_impact": 0.62
+    },
+    {
+      "date": "2026-01-05",
+      "bunker_fuel_price_usd": 419.64,
+      "port_congestion_index": 40.48,
+      "seasonal_weather_impact": 0.75
+    },
+    {
+      "date": "2026-01-06",
+      "bunker_fuel_price_usd": 426.12,
+      "port_congestion_index": 40.98,
+      "seasonal_weather_impact": 0.39
+    },
+    {
+      "date": "2026-01-07",
+      "bunker_fuel_price_usd": 422.85,
+      "port_congestion_index": 41.0,
+      "seasonal_weather_impact": 1.78
+    },
+    {
+      "date": "2026-01-08",
+      "bunker_fuel_price_usd": 427.12,
+      "port_congestion_index": 45.72,
+      "seasonal_weather_impact": 0.87
+    },
+    {
+      "date": "2026-01-09",
+      "bunker_fuel_price_usd": 422.13,
+      "port_congestion_index": 51.49,
+      "seasonal_weather_impact": 2.26
+    },
+    {
+      "date": "2026-01-10",
+      "bunker_fuel_price_usd": 426.79,
+      "port_congestion_index": 54.95,
+      "seasonal_weather_impact": 1.43
+    },
+    {
+      "date": "2026-01-11",
+      "bunker_fuel_price_usd": 432.11,
+      "port_congestion_index": 57.34,
+      "seasonal_weather_impact": 2.15
+    },
+    {
+      "date": "2026-01-12",
+      "bunker_fuel_price_usd": 428.33,
+      "port_congestion_index": 57.21,
+      "seasonal_weather_impact": 1.89
+    },
+    {
+      "date": "2026-01-13",
+      "bunker_fuel_price_usd": 430.92,
+      "port_congestion_index": 57.46,
+      "seasonal_weather_impact": 2.12
+    },
+    {
+      "date": "2026-01-14",
+      "bunker_fuel_price_usd": 421.76,
+      "port_congestion_index": 54.63,
+      "seasonal_weather_impact": 1.43
+    },
+    {
+      "date": "2026-01-15",
+      "bunker_fuel_price_usd": 426.78,
+      "port_congestion_index": 56.74,
+      "seasonal_weather_impact": 0
+    },
+    {
+      "date": "2026-01-16",
+      "bunker_fuel_price_usd": 417.93,
+      "port_congestion_index": 57.25,
+      "seasonal_weather_impact": 1.08
+    },
+    {
+      "date": "2026-01-17",
+      "bunker_fuel_price_usd": 418.19,
+      "port_congestion_index": 57.85,
+      "seasonal_weather_impact": 1.55
+    },
+    {
+      "date": "2026-01-18",
+      "bunker_fuel_price_usd": 424.24,
+      "port_congestion_index": 59.48,
+      "seasonal_weather_impact": 1.99
+    },
+    {
+      "date": "2026-01-19",
+      "bunker_fuel_price_usd": 441.66,
+      "port_congestion_index": 61.21,
+      "seasonal_weather_impact": 0.13
+    },
+    {
+      "date": "2026-01-20",
+      "bunker_fuel_price_usd": 456.18,
+      "port_congestion_index": 62.07,
+      "seasonal_weather_impact": 1.5
+    },
+    {
+      "date": "2026-01-21",
+      "bunker_fuel_price_usd": 443.48,
+      "port_congestion_index": 69.53,
+      "seasonal_weather_impact": 1.88
+    },
+    {
+      "date": "2026-01-22",
+      "bunker_fuel_price_usd": 454.78,
+      "port_congestion_index": 69.18,
+      "seasonal_weather_impact": 1.39
+    },
+    {
+      "date": "2026-01-23",
+      "bunker_fuel_price_usd": 449.6,
+      "port_congestion_index": 69.9,
+      "seasonal_weather_impact": 1.33
+    },
+    {
+      "date": "2026-01-24",
+      "bunker_fuel_price_usd": 436.89,
+      "port_congestion_index": 65.83,
+      "seasonal_weather_impact": 1.32
+    },
+    {
+      "date": "2026-01-25",
+      "bunker_fuel_price_usd": 445.02,
+      "port_congestion_index": 65.57,
+      "seasonal_weather_impact": 1.49
+    },
+    {
+      "date": "2026-01-26",
+      "bunker_fuel_price_usd": 449.83,
+      "port_congestion_index": 70.55,
+      "seasonal_weather_impact": 1.85
+    },
+    {
+      "date": "2026-01-27",
+      "bunker_fuel_price_usd": 448.63,
+      "port_congestion_index": 71.04,
+      "seasonal_weather_impact": 1.75
+    },
+    {
+      "date": "2026-01-28",
+      "bunker_fuel_price_usd": 449.1,
+      "port_congestion_index": 62.67,
+      "seasonal_weather_impact": 2.5
+    },
+    {
+      "date": "2026-01-29",
+      "bunker_fuel_price_usd": 451.94,
+      "port_congestion_index": 60.66,
+      "seasonal_weather_impact": 1.56
+    },
+    {
+      "date": "2026-01-30",
+      "bunker_fuel_price_usd": 448.14,
+      "port_congestion_index": 57.5,
+      "seasonal_weather_impact": 1.81
+    },
+    {
+      "date": "2026-01-31",
+      "bunker_fuel_price_usd": 453.74,
+      "port_congestion_index": 57.4,
+      "seasonal_weather_impact": 1.99
+    },
+    {
+      "date": "2026-02-01",
+      "bunker_fuel_price_usd": 444.94,
+      "port_congestion_index": 60.56,
+      "seasonal_weather_impact": 2.3
+    },
+    {
+      "date": "2026-02-02",
+      "bunker_fuel_price_usd": 449.63,
+      "port_congestion_index": 63.51,
+      "seasonal_weather_impact": 1.61
+    },
+    {
+      "date": "2026-02-03",
+      "bunker_fuel_price_usd": 460.8,
+      "port_congestion_index": 66.68,
+      "seasonal_weather_impact": 2.0
+    },
+    {
+      "date": "2026-02-04",
+      "bunker_fuel_price_usd": 457.69,
+      "port_congestion_index": 69.14,
+      "seasonal_weather_impact": 0.96
+    },
+    {
+      "date": "2026-02-05",
+      "bunker_fuel_price_usd": 453.78,
+      "port_congestion_index": 62.1,
+      "seasonal_weather_impact": 1.93
+    },
+    {
+      "date": "2026-02-06",
+      "bunker_fuel_price_usd": 441.29,
+      "port_congestion_index": 66.23,
+      "seasonal_weather_impact": 2.81
+    },
+    {
+      "date": "2026-02-07",
+      "bunker_fuel_price_usd": 445.75,
+      "port_congestion_index": 63.98,
+      "seasonal_weather_impact": 1.24
+    },
+    {
+      "date": "2026-02-08",
+      "bunker_fuel_price_usd": 443.13,
+      "port_congestion_index": 64.82,
+      "seasonal_weather_impact": 2.48
+    },
+    {
+      "date": "2026-02-09",
+      "bunker_fuel_price_usd": 447.07,
+      "port_congestion_index": 70.7,
+      "seasonal_weather_impact": 2.01
+    },
+    {
+      "date": "2026-02-10",
+      "bunker_fuel_price_usd": 450.59,
+      "port_congestion_index": 74.52,
+      "seasonal_weather_impact": 1.62
+    },
+    {
+      "date": "2026-02-11",
+      "bunker_fuel_price_usd": 450.79,
+      "port_congestion_index": 74.76,
+      "seasonal_weather_impact": 1.26
+    },
+    {
+      "date": "2026-02-12",
+      "bunker_fuel_price_usd": 458.07,
+      "port_congestion_index": 76.37,
+      "seasonal_weather_impact": 2.71
+    },
+    {
+      "date": "2026-02-13",
+      "bunker_fuel_price_usd": 465.58,
+      "port_congestion_index": 76.46,
+      "seasonal_weather_impact": 1.45
+    },
+    {
+      "date": "2026-02-14",
+      "bunker_fuel_price_usd": 461.4,
+      "port_congestion_index": 77.35,
+      "seasonal_weather_impact": 2.71
+    },
+    {
+      "date": "2026-02-15",
+      "bunker_fuel_price_usd": 460.27,
+      "port_congestion_index": 77.78,
+      "seasonal_weather_impact": 2.42
+    },
+    {
+      "date": "2026-02-16",
+      "bunker_fuel_price_usd": 446.9,
+      "port_congestion_index": 80.04,
+      "seasonal_weather_impact": 2.74
+    },
+    {
+      "date": "2026-02-17",
+      "bunker_fuel_price_usd": 458.54,
+      "port_congestion_index": 76.24,
+      "seasonal_weather_impact": 2.3
+    },
+    {
+      "date": "2026-02-18",
+      "bunker_fuel_price_usd": 453.55,
+      "port_congestion_index": 76.6,
+      "seasonal_weather_impact": 3.09
+    },
+    {
+      "date": "2026-02-19",
+      "bunker_fuel_price_usd": 451.54,
+      "port_congestion_index": 73.06,
+      "seasonal_weather_impact": 2.93
+    },
+    {
+      "date": "2026-02-20",
+      "bunker_fuel_price_usd": 435.06,
+      "port_congestion_index": 79.57,
+      "seasonal_weather_impact": 3.01
+    },
+    {
+      "date": "2026-02-21",
+      "bunker_fuel_price_usd": 424.41,
+      "port_congestion_index": 79.29,
+      "seasonal_weather_impact": 1.87
+    },
+    {
+      "date": "2026-02-22",
+      "bunker_fuel_price_usd": 420.62,
+      "port_congestion_index": 75.69,
+      "seasonal_weather_impact": 2.56
+    },
+    {
+      "date": "2026-02-23",
+      "bunker_fuel_price_usd": 418.16,
+      "port_congestion_index": 73.2,
+      "seasonal_weather_impact": 2.63
+    },
+    {
+      "date": "2026-02-24",
+      "bunker_fuel_price_usd": 420.55,
+      "port_congestion_index": 76.91,
+      "seasonal_weather_impact": 2.54
+    },
+    {
+      "date": "2026-02-25",
+      "bunker_fuel_price_usd": 422.81,
+      "port_congestion_index": 72.45,
+      "seasonal_weather_impact": 2.73
+    },
+    {
+      "date": "2026-02-26",
+      "bunker_fuel_price_usd": 417.52,
+      "port_congestion_index": 74.5,
+      "seasonal_weather_impact": 2.67
+    },
+    {
+      "date": "2026-02-27",
+      "bunker_fuel_price_usd": 428.7,
+      "port_congestion_index": 70.73,
+      "seasonal_weather_impact": 4.16
+    },
+    {
+      "date": "2026-02-28",
+      "bunker_fuel_price_usd": 421.65,
+      "port_congestion_index": 67.74,
+      "seasonal_weather_impact": 1.97
+    },
+    {
+      "date": "2026-03-01",
+      "bunker_fuel_price_usd": 424.17,
+      "port_congestion_index": 71.53,
+      "seasonal_weather_impact": 3.13
+    },
+    {
+      "date": "2026-03-02",
+      "bunker_fuel_price_usd": 415.66,
+      "port_congestion_index": 70.8,
+      "seasonal_weather_impact": 3.76
+    },
+    {
+      "date": "2026-03-03",
+      "bunker_fuel_price_usd": 410.43,
+      "port_congestion_index": 70.66,
+      "seasonal_weather_impact": 2.95
+    },
+    {
+      "date": "2026-03-04",
+      "bunker_fuel_price_usd": 417.34,
+      "port_congestion_index": 72.57,
+      "seasonal_weather_impact": 3.05
+    },
+    {
+      "date": "2026-03-05",
+      "bunker_fuel_price_usd": 416.38,
+      "port_congestion_index": 77.88,
+      "seasonal_weather_impact": 3.13
+    },
+    {
+      "date": "2026-03-06",
+      "bunker_fuel_price_usd": 421.24,
+      "port_congestion_index": 79.1,
+      "seasonal_weather_impact": 2.49
+    },
+    {
+      "date": "2026-03-07",
+      "bunker_fuel_price_usd": 422.18,
+      "port_congestion_index": 77.53,
+      "seasonal_weather_impact": 3.11
+    },
+    {
+      "date": "2026-03-08",
+      "bunker_fuel_price_usd": 424.74,
+      "port_congestion_index": 75.2,
+      "seasonal_weather_impact": 3.25
+    },
+    {
+      "date": "2026-03-09",
+      "bunker_fuel_price_usd": 420.12,
+      "port_congestion_index": 74.6,
+      "seasonal_weather_impact": 3.68
+    },
+    {
+      "date": "2026-03-10",
+      "bunker_fuel_price_usd": 423.29,
+      "port_congestion_index": 76.61,
+      "seasonal_weather_impact": 3.35
+    },
+    {
+      "date": "2026-03-11",
+      "bunker_fuel_price_usd": 424.47,
+      "port_congestion_index": 79.48,
+      "seasonal_weather_impact": 4.27
+    },
+    {
+      "date": "2026-03-12",
+      "bunker_fuel_price_usd": 430.98,
+      "port_congestion_index": 83.39,
+      "seasonal_weather_impact": 4.52
+    },
+    {
+      "date": "2026-03-13",
+      "bunker_fuel_price_usd": 428.55,
+      "port_congestion_index": 84.09,
+      "seasonal_weather_impact": 3.68
+    },
+    {
+      "date": "2026-03-14",
+      "bunker_fuel_price_usd": 435.24,
+      "port_congestion_index": 85.96,
+      "seasonal_weather_impact": 4.73
+    },
+    {
+      "date": "2026-03-15",
+      "bunker_fuel_price_usd": 434.14,
+      "port_congestion_index": 82.52,
+      "seasonal_weather_impact": 2.75
+    },
+    {
+      "date": "2026-03-16",
+      "bunker_fuel_price_usd": 433.29,
+      "port_congestion_index": 78.31,
+      "seasonal_weather_impact": 3.41
+    },
+    {
+      "date": "2026-03-17",
+      "bunker_fuel_price_usd": 438.01,
+      "port_congestion_index": 84.6,
+      "seasonal_weather_impact": 3.71
+    },
+    {
+      "date": "2026-03-18",
+      "bunker_fuel_price_usd": 455.07,
+      "port_congestion_index": 85.32,
+      "seasonal_weather_impact": 3.75
+    },
+    {
+      "date": "2026-03-19",
+      "bunker_fuel_price_usd": 449.53,
+      "port_congestion_index": 87.63,
+      "seasonal_weather_impact": 4.47
+    },
+    {
+      "date": "2026-03-20",
+      "bunker_fuel_price_usd": 454.85,
+      "port_congestion_index": 82.86,
+      "seasonal_weather_impact": 3.59
+    },
+    {
+      "date": "2026-03-21",
+      "bunker_fuel_price_usd": 456.62,
+      "port_congestion_index": 83.66,
+      "seasonal_weather_impact": 3.76
+    },
+    {
+      "date": "2026-03-22",
+      "bunker_fuel_price_usd": 462.96,
+      "port_congestion_index": 79.55,
+      "seasonal_weather_impact": 4.18
+    },
+    {
+      "date": "2026-03-23",
+      "bunker_fuel_price_usd": 465.2,
+      "port_congestion_index": 78.6,
+      "seasonal_weather_impact": 4.4
+    },
+    {
+      "date": "2026-03-24",
+      "bunker_fuel_price_usd": 483.29,
+      "port_congestion_index": 80.7,
+      "seasonal_weather_impact": 3.54
+    },
+    {
+      "date": "2026-03-25",
+      "bunker_fuel_price_usd": 486.05,
+      "port_congestion_index": 80.54,
+      "seasonal_weather_impact": 3.86
+    },
+    {
+      "date": "2026-03-26",
+      "bunker_fuel_price_usd": 485.17,
+      "port_congestion_index": 81.71,
+      "seasonal_weather_impact": 4.71
+    },
+    {
+      "date": "2026-03-27",
+      "bunker_fuel_price_usd": 487.41,
+      "port_congestion_index": 80.03,
+      "seasonal_weather_impact": 4.15
+    },
+    {
+      "date": "2026-03-28",
+      "bunker_fuel_price_usd": 489.0,
+      "port_congestion_index": 78.21,
+      "seasonal_weather_impact": 4.49
+    },
+    {
+      "date": "2026-03-29",
+      "bunker_fuel_price_usd": 492.06,
+      "port_congestion_index": 73.74,
+      "seasonal_weather_impact": 4.46
+    },
+    {
+      "date": "2026-03-30",
+      "bunker_fuel_price_usd": 506.12,
+      "port_congestion_index": 76.55,
+      "seasonal_weather_impact": 3.97
+    },
+    {
+      "date": "2026-03-31",
+      "bunker_fuel_price_usd": 513.89,
+      "port_congestion_index": 75.57,
+      "seasonal_weather_impact": 4.04
+    },
+    {
+      "date": "2026-04-01",
+      "bunker_fuel_price_usd": 506.84,
+      "port_congestion_index": 70.53,
+      "seasonal_weather_impact": 4.49
+    },
+    {
+      "date": "2026-04-02",
+      "bunker_fuel_price_usd": 508.02,
+      "port_congestion_index": 73.58,
+      "seasonal_weather_impact": 4.83
+    },
+    {
+      "date": "2026-04-03",
+      "bunker_fuel_price_usd": 517.36,
+      "port_congestion_index": 74.32,
+      "seasonal_weather_impact": 5.37
+    },
+    {
+      "date": "2026-04-04",
+      "bunker_fuel_price_usd": 522.09,
+      "port_congestion_index": 72.83,
+      "seasonal_weather_impact": 6.01
+    },
+    {
+      "date": "2026-04-05",
+      "bunker_fuel_price_usd": 528.56,
+      "port_congestion_index": 76.59,
+      "seasonal_weather_impact": 5.32
+    },
+    {
+      "date": "2026-04-06",
+      "bunker_fuel_price_usd": 535.56,
+      "port_congestion_index": 74.97,
+      "seasonal_weather_impact": 4.57
+    },
+    {
+      "date": "2026-04-07",
+      "bunker_fuel_price_usd": 528.05,
+      "port_congestion_index": 73.01,
+      "seasonal_weather_impact": 5.4
+    },
+    {
+      "date": "2026-04-08",
+      "bunker_fuel_price_usd": 519.26,
+      "port_congestion_index": 72.69,
+      "seasonal_weather_impact": 4.69
+    },
+    {
+      "date": "2026-04-09",
+      "bunker_fuel_price_usd": 519.73,
+      "port_congestion_index": 75.42,
+      "seasonal_weather_impact": 4.95
+    },
+    {
+      "date": "2026-04-10",
+      "bunker_fuel_price_usd": 504.75,
+      "port_congestion_index": 70.9,
+      "seasonal_weather_impact": 5.57
+    },
+    {
+      "date": "2026-04-11",
+      "bunker_fuel_price_usd": 507.71,
+      "port_congestion_index": 71.35,
+      "seasonal_weather_impact": 5.85
+    },
+    {
+      "date": "2026-04-12",
+      "bunker_fuel_price_usd": 519.5,
+      "port_congestion_index": 67.03,
+      "seasonal_weather_impact": 4.87
+    },
+    {
+      "date": "2026-04-13",
+      "bunker_fuel_price_usd": 522.78,
+      "port_congestion_index": 63.32,
+      "seasonal_weather_impact": 4.38
+    },
+    {
+      "date": "2026-04-14",
+      "bunker_fuel_price_usd": 533.62,
+      "port_congestion_index": 61.26,
+      "seasonal_weather_impact": 6.32
+    },
+    {
+      "date": "2026-04-15",
+      "bunker_fuel_price_usd": 542.37,
+      "port_congestion_index": 63.52,
+      "seasonal_weather_impact": 3.87
+    },
+    {
+      "date": "2026-04-16",
+      "bunker_fuel_price_usd": 542.93,
+      "port_congestion_index": 66.1,
+      "seasonal_weather_impact": 5.47
+    },
+    {
+      "date": "2026-04-17",
+      "bunker_fuel_price_usd": 546.78,
+      "port_congestion_index": 63.27,
+      "seasonal_weather_impact": 4.89
+    },
+    {
+      "date": "2026-04-18",
+      "bunker_fuel_price_usd": 545.26,
+      "port_congestion_index": 67.83,
+      "seasonal_weather_impact": 5.26
+    },
+    {
+      "date": "2026-04-19",
+      "bunker_fuel_price_usd": 547.6,
+      "port_congestion_index": 63.55,
+      "seasonal_weather_impact": 5.06
+    },
+    {
+      "date": "2026-04-20",
+      "bunker_fuel_price_usd": 544.19,
+      "port_congestion_index": 64.95,
+      "seasonal_weather_impact": 5.9
+    },
+    {
+      "date": "2026-04-21",
+      "bunker_fuel_price_usd": 538.18,
+      "port_congestion_index": 62.69,
+      "seasonal_weather_impact": 4.99
+    },
+    {
+      "date": "2026-04-22",
+      "bunker_fuel_price_usd": 541.67,
+      "port_congestion_index": 58.25,
+      "seasonal_weather_impact": 6.14
+    },
+    {
+      "date": "2026-04-23",
+      "bunker_fuel_price_usd": 538.28,
+      "port_congestion_index": 59.01,
+      "seasonal_weather_impact": 5.21
+    },
+    {
+      "date": "2026-04-24",
+      "bunker_fuel_price_usd": 528.85,
+      "port_congestion_index": 58.13,
+      "seasonal_weather_impact": 5.17
+    },
+    {
+      "date": "2026-04-25",
+      "bunker_fuel_price_usd": 542.05,
+      "port_congestion_index": 56.01,
+      "seasonal_weather_impact": 5.59
+    },
+    {
+      "date": "2026-04-26",
+      "bunker_fuel_price_usd": 549.29,
+      "port_congestion_index": 57.56,
+      "seasonal_weather_impact": 6.22
+    },
+    {
+      "date": "2026-04-27",
+      "bunker_fuel_price_usd": 549.6,
+      "port_congestion_index": 54.4,
+      "seasonal_weather_impact": 5.29
+    },
+    {
+      "date": "2026-04-28",
+      "bunker_fuel_price_usd": 546.86,
+      "port_congestion_index": 52.72,
+      "seasonal_weather_impact": 5.88
+    },
+    {
+      "date": "2026-04-29",
+      "bunker_fuel_price_usd": 549.07,
+      "port_congestion_index": 55.88,
+      "seasonal_weather_impact": 7.1
+    },
+    {
+      "date": "2026-04-30",
+      "bunker_fuel_price_usd": 533.97,
+      "port_congestion_index": 56.45,
+      "seasonal_weather_impact": 5.99
+    },
+    {
+      "date": "2026-05-01",
+      "bunker_fuel_price_usd": 527.1,
+      "port_congestion_index": 52.57,
+      "seasonal_weather_impact": 6.57
+    },
+    {
+      "date": "2026-05-02",
+      "bunker_fuel_price_usd": 543.63,
+      "port_congestion_index": 50.9,
+      "seasonal_weather_impact": 6.13
+    },
+    {
+      "date": "2026-05-03",
+      "bunker_fuel_price_usd": 540.89,
+      "port_congestion_index": 49.05,
+      "seasonal_weather_impact": 5.52
+    },
+    {
+      "date": "2026-05-04",
+      "bunker_fuel_price_usd": 562.15,
+      "port_congestion_index": 50.71,
+      "seasonal_weather_impact": 6.68
+    },
+    {
+      "date": "2026-05-05",
+      "bunker_fuel_price_usd": 554.61,
+      "port_congestion_index": 50.19,
+      "seasonal_weather_impact": 5.98
+    },
+    {
+      "date": "2026-05-06",
+      "bunker_fuel_price_usd": 556.46,
+      "port_congestion_index": 48.21,
+      "seasonal_weather_impact": 6.38
+    },
+    {
+      "date": "2026-05-07",
+      "bunker_fuel_price_usd": 559.28,
+      "port_congestion_index": 51.44,
+      "seasonal_weather_impact": 6.36
+    },
+    {
+      "date": "2026-05-08",
+      "bunker_fuel_price_usd": 569.69,
+      "port_congestion_index": 46.34,
+      "seasonal_weather_impact": 6.45
+    },
+    {
+      "date": "2026-05-09",
+      "bunker_fuel_price_usd": 583.1,
+      "port_congestion_index": 50.52,
+      "seasonal_weather_impact": 6.48
+    },
+    {
+      "date": "2026-05-10",
+      "bunker_fuel_price_usd": 594.9,
+      "port_congestion_index": 53.68,
+      "seasonal_weather_impact": 4.56
+    },
+    {
+      "date": "2026-05-11",
+      "bunker_fuel_price_usd": 598.28,
+      "port_congestion_index": 50.68,
+      "seasonal_weather_impact": 6.47
+    },
+    {
+      "date": "2026-05-12",
+      "bunker_fuel_price_usd": 588.53,
+      "port_congestion_index": 55.86,
+      "seasonal_weather_impact": 6.55
+    },
+    {
+      "date": "2026-05-13",
+      "bunker_fuel_price_usd": 576.89,
+      "port_congestion_index": 55.21,
+      "seasonal_weather_impact": 5.55
+    },
+    {
+      "date": "2026-05-14",
+      "bunker_fuel_price_usd": 588.74,
+      "port_congestion_index": 61.66,
+      "seasonal_weather_impact": 6.39
+    },
+    {
+      "date": "2026-05-15",
+      "bunker_fuel_price_usd": 598.17,
+      "port_congestion_index": 59.74,
+      "seasonal_weather_impact": 7.0
+    },
+    {
+      "date": "2026-05-16",
+      "bunker_fuel_price_usd": 595.73,
+      "port_congestion_index": 62.94,
+      "seasonal_weather_impact": 5.85
+    },
+    {
+      "date": "2026-05-17",
+      "bunker_fuel_price_usd": 598.96,
+      "port_congestion_index": 64.24,
+      "seasonal_weather_impact": 6.74
+    },
+    {
+      "date": "2026-05-18",
+      "bunker_fuel_price_usd": 606.01,
+      "port_congestion_index": 65.15,
+      "seasonal_weather_impact": 6.55
+    },
+    {
+      "date": "2026-05-19",
+      "bunker_fuel_price_usd": 605.78,
+      "port_congestion_index": 62.84,
+      "seasonal_weather_impact": 5.97
+    },
+    {
+      "date": "2026-05-20",
+      "bunker_fuel_price_usd": 608.51,
+      "port_congestion_index": 61.79,
+      "seasonal_weather_impact": 6.41
+    },
+    {
+      "date": "2026-05-21",
+      "bunker_fuel_price_usd": 608.28,
+      "port_congestion_index": 59.71,
+      "seasonal_weather_impact": 8.2
+    },
+    {
+      "date": "2026-05-22",
+      "bunker_fuel_price_usd": 629.38,
+      "port_congestion_index": 59.89,
+      "seasonal_weather_impact": 5.73
+    },
+    {
+      "date": "2026-05-23",
+      "bunker_fuel_price_usd": 621.48,
+      "port_congestion_index": 61.51,
+      "seasonal_weather_impact": 7.86
+    },
+    {
+      "date": "2026-05-24",
+      "bunker_fuel_price_usd": 623.25,
+      "port_congestion_index": 64.48,
+      "seasonal_weather_impact": 6.48
+    },
+    {
+      "date": "2026-05-25",
+      "bunker_fuel_price_usd": 611.87,
+      "port_congestion_index": 65.74,
+      "seasonal_weather_impact": 6.88
+    },
+    {
+      "date": "2026-05-26",
+      "bunker_fuel_price_usd": 609.98,
+      "port_congestion_index": 68.11,
+      "seasonal_weather_impact": 5.89
+    },
+    {
+      "date": "2026-05-27",
+      "bunker_fuel_price_usd": 611.57,
+      "port_congestion_index": 71.3,
+      "seasonal_weather_impact": 6.52
+    },
+    {
+      "date": "2026-05-28",
+      "bunker_fuel_price_usd": 592.6,
+      "port_congestion_index": 78.13,
+      "seasonal_weather_impact": 5.94
+    },
+    {
+      "date": "2026-05-29",
+      "bunker_fuel_price_usd": 580.21,
+      "port_congestion_index": 79.07,
+      "seasonal_weather_impact": 7.34
+    },
+    {
+      "date": "2026-05-30",
+      "bunker_fuel_price_usd": 592.0,
+      "port_congestion_index": 82.1,
+      "seasonal_weather_impact": 6.83
+    },
+    {
+      "date": "2026-05-31",
+      "bunker_fuel_price_usd": 589.62,
+      "port_congestion_index": 83.16,
+      "seasonal_weather_impact": 6.37
+    },
+    {
+      "date": "2026-06-01",
+      "bunker_fuel_price_usd": 589.76,
+      "port_congestion_index": 91.35,
+      "seasonal_weather_impact": 7.13
+    },
+    {
+      "date": "2026-06-02",
+      "bunker_fuel_price_usd": 579.29,
+      "port_congestion_index": 90.4,
+      "seasonal_weather_impact": 6.84
+    },
+    {
+      "date": "2026-06-03",
+      "bunker_fuel_price_usd": 592.28,
+      "port_congestion_index": 86.74,
+      "seasonal_weather_impact": 6.84
+    },
+    {
+      "date": "2026-06-04",
+      "bunker_fuel_price_usd": 593.08,
+      "port_congestion_index": 84.18,
+      "seasonal_weather_impact": 6.94
+    },
+    {
+      "date": "2026-06-05",
+      "bunker_fuel_price_usd": 583.41,
+      "port_congestion_index": 86.64,
+      "seasonal_weather_impact": 6.89
+    },
+    {
+      "date": "2026-06-06",
+      "bunker_fuel_price_usd": 577.47,
+      "port_congestion_index": 88.59,
+      "seasonal_weather_impact": 7.04
+    },
+    {
+      "date": "2026-06-07",
+      "bunker_fuel_price_usd": 576.65,
+      "port_congestion_index": 90.64,
+      "seasonal_weather_impact": 6.57
+    },
+    {
+      "date": "2026-06-08",
+      "bunker_fuel_price_usd": 580.81,
+      "port_congestion_index": 92.16,
+      "seasonal_weather_impact": 7.03
+    },
+    {
+      "date": "2026-06-09",
+      "bunker_fuel_price_usd": 596.12,
+      "port_congestion_index": 89.55,
+      "seasonal_weather_impact": 7.1
+    },
+    {
+      "date": "2026-06-10",
+      "bunker_fuel_price_usd": 600.97,
+      "port_congestion_index": 88.98,
+      "seasonal_weather_impact": 6.62
+    },
+    {
+      "date": "2026-06-11",
+      "bunker_fuel_price_usd": 600.67,
+      "port_congestion_index": 91.17,
+      "seasonal_weather_impact": 6.86
+    },
+    {
+      "date": "2026-06-12",
+      "bunker_fuel_price_usd": 584.47,
+      "port_congestion_index": 90.38,
+      "seasonal_weather_impact": 6.97
+    },
+    {
+      "date": "2026-06-13",
+      "bunker_fuel_price_usd": 596.73,
+      "port_congestion_index": 90.56,
+      "seasonal_weather_impact": 6.93
+    },
+    {
+      "date": "2026-06-14",
+      "bunker_fuel_price_usd": 590.2,
+      "port_congestion_index": 89.57,
+      "seasonal_weather_impact": 7.13
+    },
+    {
+      "date": "2026-06-15",
+      "bunker_fuel_price_usd": 584.01,
+      "port_congestion_index": 86.64,
+      "seasonal_weather_impact": 6.76
+    },
+    {
+      "date": "2026-06-16",
+      "bunker_fuel_price_usd": 562.17,
+      "port_congestion_index": 84.27,
+      "seasonal_weather_impact": 6.02
+    },
+    {
+      "date": "2026-06-17",
+      "bunker_fuel_price_usd": 569.02,
+      "port_congestion_index": 89.93,
+      "seasonal_weather_impact": 6.8
+    },
+    {
+      "date": "2026-06-18",
+      "bunker_fuel_price_usd": 569.12,
+      "port_congestion_index": 86.47,
+      "seasonal_weather_impact": 6.98
+    },
+    {
+      "date": "2026-06-19",
+      "bunker_fuel_price_usd": 567.63,
+      "port_congestion_index": 89.6,
+      "seasonal_weather_impact": 6.64
+    },
+    {
+      "date": "2026-06-20",
+      "bunker_fuel_price_usd": 558.48,
+      "port_congestion_index": 89.27,
+      "seasonal_weather_impact": 6.26
+    },
+    {
+      "date": "2026-06-21",
+      "bunker_fuel_price_usd": 561.21,
+      "port_congestion_index": 92.42,
+      "seasonal_weather_impact": 6.41
+    },
+    {
+      "date": "2026-06-22",
+      "bunker_fuel_price_usd": 556.35,
+      "port_congestion_index": 92.84,
+      "seasonal_weather_impact": 7.29
+    },
+    {
+      "date": "2026-06-23",
+      "bunker_fuel_price_usd": 550.32,
+      "port_congestion_index": 93.49,
+      "seasonal_weather_impact": 5.94
+    },
+    {
+      "date": "2026-06-24",
+      "bunker_fuel_price_usd": 551.12,
+      "port_congestion_index": 95.28,
+      "seasonal_weather_impact": 6.62
+    },
+    {
+      "date": "2026-06-25",
+      "bunker_fuel_price_usd": 567.19,
+      "port_congestion_index": 95.58,
+      "seasonal_weather_impact": 7.41
+    },
+    {
+      "date": "2026-06-26",
+      "bunker_fuel_price_usd": 564.55,
+      "port_congestion_index": 95.25,
+      "seasonal_weather_impact": 7.23
+    },
+    {
+      "date": "2026-06-27",
+      "bunker_fuel_price_usd": 558.1,
+      "port_congestion_index": 93.07,
+      "seasonal_weather_impact": 6.72
+    },
+    {
+      "date": "2026-06-28",
+      "bunker_fuel_price_usd": 568.84,
+      "port_congestion_index": 100,
+      "seasonal_weather_impact": 6.97
+    },
+    {
+      "date": "2026-06-29",
+      "bunker_fuel_price_usd": 574.61,
+      "port_congestion_index": 100,
+      "seasonal_weather_impact": 7.84
+    },
+    {
+      "date": "2026-06-30",
+      "bunker_fuel_price_usd": 581.81,
+      "port_congestion_index": 100,
+      "seasonal_weather_impact": 7.13
+    },
+    {
+      "date": "2026-07-01",
+      "bunker_fuel_price_usd": 577.36,
+      "port_congestion_index": 100,
+      "seasonal_weather_impact": 7.24
+    },
+    {
+      "date": "2026-07-02",
+      "bunker_fuel_price_usd": 583.49,
+      "port_congestion_index": 96.58,
+      "seasonal_weather_impact": 6.87
+    },
+    {
+      "date": "2026-07-03",
+      "bunker_fuel_price_usd": 581.04,
+      "port_congestion_index": 100,
+      "seasonal_weather_impact": 7.51
+    },
+    {
+      "date": "2026-07-04",
+      "bunker_fuel_price_usd": 584.47,
+      "port_congestion_index": 100,
+      "seasonal_weather_impact": 7.62
+    },
+    {
+      "date": "2026-07-05",
+      "bunker_fuel_price_usd": 583.91,
+      "port_congestion_index": 100,
+      "seasonal_weather_impact": 6.55
+    },
+    {
+      "date": "2026-07-06",
+      "bunker_fuel_price_usd": 581.31,
+      "port_congestion_index": 96.28,
+      "seasonal_weather_impact": 7.43
+    },
+    {
+      "date": "2026-07-07",
+      "bunker_fuel_price_usd": 591.92,
+      "port_congestion_index": 96.97,
+      "seasonal_weather_impact": 7.19
+    },
+    {
+      "date": "2026-07-08",
+      "bunker_fuel_price_usd": 594.05,
+      "port_congestion_index": 97.5,
+      "seasonal_weather_impact": 6.14
+    },
+    {
+      "date": "2026-07-09",
+      "bunker_fuel_price_usd": 589.63,
+      "port_congestion_index": 96.52,
+      "seasonal_weather_impact": 6.94
+    },
+    {
+      "date": "2026-07-10",
+      "bunker_fuel_price_usd": 576.44,
+      "port_congestion_index": 93.98,
+      "seasonal_weather_impact": 6.34
+    },
+    {
+      "date": "2026-07-11",
+      "bunker_fuel_price_usd": 561.74,
+      "port_congestion_index": 96.0,
+      "seasonal_weather_impact": 6.76
+    },
+    {
+      "date": "2026-07-12",
+      "bunker_fuel_price_usd": 558.81,
+      "port_congestion_index": 99.41,
+      "seasonal_weather_impact": 7.24
+    },
+    {
+      "date": "2026-07-13",
+      "bunker_fuel_price_usd": 576.66,
+      "port_congestion_index": 98.61,
+      "seasonal_weather_impact": 6.98
+    },
+    {
+      "date": "2026-07-14",
+      "bunker_fuel_price_usd": 570.78,
+      "port_congestion_index": 98.1,
+      "seasonal_weather_impact": 6.3
+    },
+    {
+      "date": "2026-07-15",
+      "bunker_fuel_price_usd": 576.03,
+      "port_congestion_index": 97.37,
+      "seasonal_weather_impact": 6.63
+    },
+    {
+      "date": "2026-07-16",
+      "bunker_fuel_price_usd": 578.47,
+      "port_congestion_index": 93.04,
+      "seasonal_weather_impact": 7.29
+    },
+    {
+      "date": "2026-07-17",
+      "bunker_fuel_price_usd": 588.35,
+      "port_congestion_index": 95.33,
+      "seasonal_weather_impact": 6.21
+    },
+    {
+      "date": "2026-07-18",
+      "bunker_fuel_price_usd": 598.0,
+      "port_congestion_index": 92.34,
+      "seasonal_weather_impact": 6.66
+    },
+    {
+      "date": "2026-07-19",
+      "bunker_fuel_price_usd": 599.73,
+      "port_congestion_index": 92.59,
+      "seasonal_weather_impact": 8.06
+    },
+    {
+      "date": "2026-07-20",
+      "bunker_fuel_price_usd": 612.78,
+      "port_congestion_index": 92.11,
+      "seasonal_weather_impact": 6.47
+    },
+    {
+      "date": "2026-07-21",
+      "bunker_fuel_price_usd": 623.2,
+      "port_congestion_index": 88.11,
+      "seasonal_weather_impact": 6.83
+    },
+    {
+      "date": "2026-07-22",
+      "bunker_fuel_price_usd": 626.04,
+      "port_congestion_index": 85.39,
+      "seasonal_weather_impact": 5.96
+    },
+    {
+      "date": "2026-07-23",
+      "bunker_fuel_price_usd": 621.68,
+      "port_congestion_index": 87.44,
+      "seasonal_weather_impact": 6.87
+    },
+    {
+      "date": "2026-07-24",
+      "bunker_fuel_price_usd": 624.73,
+      "port_congestion_index": 88.79,
+      "seasonal_weather_impact": 7.31
+    },
+    {
+      "date": "2026-07-25",
+      "bunker_fuel_price_usd": 623.1,
+      "port_congestion_index": 86.05,
+      "seasonal_weather_impact": 5.71
+    },
+    {
+      "date": "2026-07-26",
+      "bunker_fuel_price_usd": 628.21,
+      "port_congestion_index": 85.67,
+      "seasonal_weather_impact": 6.95
+    },
+    {
+      "date": "2026-07-27",
+      "bunker_fuel_price_usd": 635.02,
+      "port_congestion_index": 84.19,
+      "seasonal_weather_impact": 7.11
+    },
+    {
+      "date": "2026-07-28",
+      "bunker_fuel_price_usd": 630.89,
+      "port_congestion_index": 83.95,
+      "seasonal_weather_impact": 7.11
+    },
+    {
+      "date": "2026-07-29",
+      "bunker_fuel_price_usd": 631.94,
+      "port_congestion_index": 86.43,
+      "seasonal_weather_impact": 6.24
+    },
+    {
+      "date": "2026-07-30",
+      "bunker_fuel_price_usd": 629.85,
+      "port_congestion_index": 75.73,
+      "seasonal_weather_impact": 6.18
+    },
+    {
+      "date": "2026-07-31",
+      "bunker_fuel_price_usd": 637.57,
+      "port_congestion_index": 71.35,
+      "seasonal_weather_impact": 5.86
+    },
+    {
+      "date": "2026-08-01",
+      "bunker_fuel_price_usd": 628.95,
+      "port_congestion_index": 65.38,
+      "seasonal_weather_impact": 5.53
+    },
+    {
+      "date": "2026-08-02",
+      "bunker_fuel_price_usd": 624.55,
+      "port_congestion_index": 61.73,
+      "seasonal_weather_impact": 7.01
+    },
+    {
+      "date": "2026-08-03",
+      "bunker_fuel_price_usd": 621.99,
+      "port_congestion_index": 64.88,
+      "seasonal_weather_impact": 6.95
+    },
+    {
+      "date": "2026-08-04",
+      "bunker_fuel_price_usd": 626.2,
+      "port_congestion_index": 61.98,
+      "seasonal_weather_impact": 6.25
+    },
+    {
+      "date": "2026-08-05",
+      "bunker_fuel_price_usd": 632.25,
+      "port_congestion_index": 65.59,
+      "seasonal_weather_impact": 5.39
+    },
+    {
+      "date": "2026-08-06",
+      "bunker_fuel_price_usd": 637.65,
+      "port_congestion_index": 67.62,
+      "seasonal_weather_impact": 6.23
+    },
+    {
+      "date": "2026-08-07",
+      "bunker_fuel_price_usd": 646.02,
+      "port_congestion_index": 68.89,
+      "seasonal_weather_impact": 6.53
+    },
+    {
+      "date": "2026-08-08",
+      "bunker_fuel_price_usd": 657.27,
+      "port_congestion_index": 71.97,
+      "seasonal_weather_impact": 6.11
+    },
+    {
+      "date": "2026-08-09",
+      "bunker_fuel_price_usd": 647.46,
+      "port_congestion_index": 67.9,
+      "seasonal_weather_impact": 6.46
+    },
+    {
+      "date": "2026-08-10",
+      "bunker_fuel_price_usd": 649.54,
+      "port_congestion_index": 67.43,
+      "seasonal_weather_impact": 6.02
+    },
+    {
+      "date": "2026-08-11",
+      "bunker_fuel_price_usd": 651.64,
+      "port_congestion_index": 67.24,
+      "seasonal_weather_impact": 5.87
+    },
+    {
+      "date": "2026-08-12",
+      "bunker_fuel_price_usd": 653.87,
+      "port_congestion_index": 68.5,
+      "seasonal_weather_impact": 5.46
+    },
+    {
+      "date": "2026-08-13",
+      "bunker_fuel_price_usd": 661.3,
+      "port_congestion_index": 70.04,
+      "seasonal_weather_impact": 5.78
+    },
+    {
+      "date": "2026-08-14",
+      "bunker_fuel_price_usd": 664.51,
+      "port_congestion_index": 66.33,
+      "seasonal_weather_impact": 6.21
+    },
+    {
+      "date": "2026-08-15",
+      "bunker_fuel_price_usd": 657.93,
+      "port_congestion_index": 65.82,
+      "seasonal_weather_impact": 5.19
+    },
+    {
+      "date": "2026-08-16",
+      "bunker_fuel_price_usd": 653.02,
+      "port_congestion_index": 67.95,
+      "seasonal_weather_impact": 5.02
+    },
+    {
+      "date": "2026-08-17",
+      "bunker_fuel_price_usd": 628.48,
+      "port_congestion_index": 69.62,
+      "seasonal_weather_impact": 7.09
+    },
+    {
+      "date": "2026-08-18",
+      "bunker_fuel_price_usd": 614.41,
+      "port_congestion_index": 69.35,
+      "seasonal_weather_impact": 5.64
+    },
+    {
+      "date": "2026-08-19",
+      "bunker_fuel_price_usd": 612.65,
+      "port_congestion_index": 72.84,
+      "seasonal_weather_impact": 5.24
+    },
+    {
+      "date": "2026-08-20",
+      "bunker_fuel_price_usd": 617.7,
+      "port_congestion_index": 71.8,
+      "seasonal_weather_impact": 5.4
+    },
+    {
+      "date": "2026-08-21",
+      "bunker_fuel_price_usd": 609.05,
+      "port_congestion_index": 68.4,
+      "seasonal_weather_impact": 5.72
+    },
+    {
+      "date": "2026-08-22",
+      "bunker_fuel_price_usd": 612.89,
+      "port_congestion_index": 73.47,
+      "seasonal_weather_impact": 5.9
+    },
+    {
+      "date": "2026-08-23",
+      "bunker_fuel_price_usd": 607.32,
+      "port_congestion_index": 73.21,
+      "seasonal_weather_impact": 5.41
+    },
+    {
+      "date": "2026-08-24",
+      "bunker_fuel_price_usd": 618.87,
+      "port_congestion_index": 70.08,
+      "seasonal_weather_impact": 5.37
+    },
+    {
+      "date": "2026-08-25",
+      "bunker_fuel_price_usd": 616.27,
+      "port_congestion_index": 66.89,
+      "seasonal_weather_impact": 5.79
+    },
+    {
+      "date": "2026-08-26",
+      "bunker_fuel_price_usd": 608.98,
+      "port_congestion_index": 61.29,
+      "seasonal_weather_impact": 5.71
+    },
+    {
+      "date": "2026-08-27",
+      "bunker_fuel_price_usd": 609.34,
+      "port_congestion_index": 67.66,
+      "seasonal_weather_impact": 5.29
+    },
+    {
+      "date": "2026-08-28",
+      "bunker_fuel_price_usd": 607.85,
+      "port_congestion_index": 67.09,
+      "seasonal_weather_impact": 5.18
+    },
+    {
+      "date": "2026-08-29",
+      "bunker_fuel_price_usd": 604.29,
+      "port_congestion_index": 64.11,
+      "seasonal_weather_impact": 5.75
+    },
+    {
+      "date": "2026-08-30",
+      "bunker_fuel_price_usd": 609.16,
+      "port_congestion_index": 64.43,
+      "seasonal_weather_impact": 5.07
+    },
+    {
+      "date": "2026-08-31",
+      "bunker_fuel_price_usd": 606.18,
+      "port_congestion_index": 64.17,
+      "seasonal_weather_impact": 5.22
+    },
+    {
+      "date": "2026-09-01",
+      "bunker_fuel_price_usd": 600.67,
+      "port_congestion_index": 67.63,
+      "seasonal_weather_impact": 5.34
+    },
+    {
+      "date": "2026-09-02",
+      "bunker_fuel_price_usd": 607.23,
+      "port_congestion_index": 66.5,
+      "seasonal_weather_impact": 4.63
+    },
+    {
+      "date": "2026-09-03",
+      "bunker_fuel_price_usd": 589.67,
+      "port_congestion_index": 68.72,
+      "seasonal_weather_impact": 4.06
+    },
+    {
+      "date": "2026-09-04",
+      "bunker_fuel_price_usd": 576.71,
+      "port_congestion_index": 66.69,
+      "seasonal_weather_impact": 3.95
+    }
+  ]
+}
