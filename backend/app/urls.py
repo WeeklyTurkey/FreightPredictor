@@ -36,6 +36,7 @@ from app.views import (
     PortViewSet, VesselViewSet, RouteViewSet,
     FreightRateHistoryViewSet, ForecastViewSet,
     ChartererViewSet, MarketIndexViewSet, MacroFactorViewSet,
+    BunkerFuelPriceViewSet,
     GenerateForecastView, CalculateCostView,
     GenerateRecommendationView, PortFeasibilityView,
     PortTrafficView, DashboardSummaryView,
@@ -50,11 +51,9 @@ router.register(r'forecasts', ForecastViewSet, basename='forecast')
 router.register(r'charterers', ChartererViewSet, basename='charterer')
 router.register(r'market-indices', MarketIndexViewSet, basename='market-index')
 router.register(r'macro-factors', MacroFactorViewSet, basename='macro-factor')
+router.register(r'bunker-fuel-prices', BunkerFuelPriceViewSet, basename='bunker-fuel-price')
 
 urlpatterns = [
-    # ViewSet routes
-    path('', include(router.urls)),
-
     # Action endpoints (POST)
     path('forecasts/generate/', GenerateForecastView.as_view(), name='generate-forecast'),
     path('cost-breakdown/', CalculateCostView.as_view(), name='calculate-cost'),
@@ -64,4 +63,7 @@ urlpatterns = [
     # Read-only computed endpoints (GET)
     path('port-traffic/', PortTrafficView.as_view(), name='port-traffic'),
     path('dashboard/', DashboardSummaryView.as_view(), name='dashboard-summary'),
+
+    # ViewSet routes (Catch-all)
+    path('', include(router.urls)),
 ]

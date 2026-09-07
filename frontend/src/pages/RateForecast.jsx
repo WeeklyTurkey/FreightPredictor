@@ -18,7 +18,7 @@ import {
   getCargoTypes,
   triggerForecastGeneration,
 } from '../api/freightService';
-import { Play } from 'lucide-react';
+
 
 export default function RateForecast() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,12 +51,42 @@ export default function RateForecast() {
     if (!selectedRouteId) return;
     setLoading(true);
     const cargo = selectedCargo || 'coking_coal';
-    getRates(selectedRouteId, selectedVesselClass, cargo).then((data) => {
-      setForecastData(data);
-      setLoading(false);
-    });
+
+    const fetchData = async () => {
+      try {
+        const data = await getRates(selectedRouteId, selectedVesselClass, cargo);
+        setForecastData(data);
+
+        // If no ML forecast data came back, auto-generate it
+        const hasForecast = data?.forecast?.length > 0;
+        if (!hasForecast && vesselClasses.length > 0) {
+          setGenerating(true);
+          setGenMessage('Auto-generating ML forecast...');
+          const vClass = vesselClasses.find(v => v.name === selectedVesselClass);
+          const vId = vClass ? vClass.id : (vesselClasses[0]?.id || 1);
+          try {
+            await triggerForecastGeneration(selectedRouteId, vId, cargo, 90);
+            // Re-fetch with newly generated forecasts
+            const refreshed = await getRates(selectedRouteId, selectedVesselClass, cargo);
+            setForecastData(refreshed);
+            setGenMessage('ML forecast generated successfully!');
+          } catch (genErr) {
+            console.warn('Auto forecast generation failed:', genErr);
+            setGenMessage('');
+          } finally {
+            setGenerating(false);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch rates:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
     setSearchParams({ route: selectedRouteId });
-  }, [selectedRouteId, selectedVesselClass, selectedCargo]);
+  }, [selectedRouteId, selectedVesselClass, selectedCargo, vesselClasses]);
 
   const handleRouteChange = (e) => setSelectedRouteId(e.target.value);
   const handleVesselClassChange = (e) => setSelectedVesselClass(e.target.value);
@@ -69,8 +99,13 @@ export default function RateForecast() {
     if (!forecastData) return null;
     const ranges = { '6m': 180, '1y': 365, '2y': 730 };
     const days = ranges[dateRange] || 730;
-    const histSlice = forecastData.historical?.slice(-days) || [];
-    const combinedSlice = forecastData.combined?.slice(-(days + 90)) || [];
+    
+    const histLength = forecastData.historical?.length || 0;
+    const startIndex = Math.max(0, histLength - days);
+    
+    const histSlice = forecastData.historical?.slice(startIndex) || [];
+    const combinedSlice = forecastData.combined?.slice(startIndex) || [];
+    
     return {
       ...forecastData,
       historical: histSlice,
@@ -80,21 +115,7 @@ export default function RateForecast() {
 
   const filteredData = getFilteredData();
 
-  const handleRunForecast = async () => {
-    setGenerating(true);
-    setGenMessage('');
-    try {
-      const res = await triggerForecastGeneration(selectedRouteId, 1, 'coking_coal', 90);
-      setGenMessage(res.message || 'Generated Prophet forecast successfully!');
-      // Refresh forecast chart data
-      const data = await getRates(selectedRouteId, selectedVesselClass);
-      setForecastData(data);
-    } catch (err) {
-      setGenMessage('Forecast generation complete.');
-    } finally {
-      setGenerating(false);
-    }
-  };
+
 
   return (
     <div className="min-h-screen">
@@ -106,24 +127,13 @@ export default function RateForecast() {
             <p className="text-sm text-slate-400 mt-1">Historical freight rates with 90-day Prophet forecast projections</p>
           </div>
           <div className="flex items-center gap-3">
-            {genMessage && <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">{genMessage}</span>}
-            <button
-              onClick={handleRunForecast}
-              disabled={generating}
-              className="btn-primary flex items-center gap-2 text-sm bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg shadow-sm font-medium transition-all"
-            >
-              {generating ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Running Prophet ML...
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4 fill-white" />
-                  Trigger Prophet ML Forecast
-                </>
-              )}
-            </button>
+            {generating && (
+              <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 flex items-center gap-2">
+                <div className="w-3 h-3 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                Auto-generating ML forecast...
+              </span>
+            )}
+            {genMessage && !generating && <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">{genMessage}</span>}
           </div>
         </div>
 

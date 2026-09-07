@@ -24,12 +24,14 @@ from rest_framework.views import APIView
 from app.models import (
     Port, Vessel, Route, FreightRateHistory, Forecast,
     Charterer, MarketIndex, MacroFactor, CostBreakdown, Recommendation,
+    BunkerFuelPrice,
 )
 from app.serializers import (
     PortSerializer, VesselSerializer, RouteSerializer, RouteListSerializer,
     FreightRateHistorySerializer, ForecastSerializer,
     ChartererSerializer, ChartererListSerializer,
     MarketIndexSerializer, MacroFactorSerializer,
+    BunkerFuelPriceSerializer,
     CostBreakdownSerializer, CostBreakdownRequestSerializer,
     RecommendationSerializer, RecommendationRequestSerializer,
     ForecastRequestSerializer,
@@ -368,6 +370,27 @@ class MacroFactorViewSet(viewsets.ReadOnlyModelViewSet):
         if latest:
             return Response(MacroFactorSerializer(latest).data)
         return Response({'message': 'No macro factor data available.'}, status=404)
+
+
+class BunkerFuelPriceViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Daily bunker fuel prices (Marine Gas Oil).
+    Supports filtering by:
+      ?date_from=YYYY-MM-DD
+      ?date_to=YYYY-MM-DD
+    """
+    queryset = BunkerFuelPrice.objects.all()
+    serializer_class = BunkerFuelPriceSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        date_from = self.request.query_params.get('date_from')
+        date_to = self.request.query_params.get('date_to')
+        if date_from:
+            qs = qs.filter(date__gte=date_from)
+        if date_to:
+            qs = qs.filter(date__lte=date_to)
+        return qs
 
 
 class CalculateCostView(APIView):

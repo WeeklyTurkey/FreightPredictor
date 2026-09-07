@@ -86,9 +86,9 @@ export default function RateBreakdown() {
 
   const getFilteredData = () => {
     if (!forecastData) return [];
-    const ranges = { '3m': 13, '6m': 26, '1y': 52, '2y': 104 };
-    const weeks = ranges[dateRange] || 26;
-    return forecastData.historical?.slice(-weeks).reverse() || [];
+    const ranges = { '3m': 90, '6m': 180, '1y': 365, '2y': 730 };
+    const days = ranges[dateRange] || 180;
+    return forecastData.historical?.slice(-days).reverse() || [];
   };
 
   const breakdownData = getFilteredData();

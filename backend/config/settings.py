@@ -1,9 +1,10 @@
 """
 Django settings for SIH26006 Freight Forecasting Platform.
 
-Uses SQLite (zero-setup), CORS for React frontend, and DRF for API layer.
+Uses PostgreSQL, CORS for React frontend, and DRF for API layer.
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -68,13 +69,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # ---------------------------------------------------------------------------
-# Database — SQLite for demo, zero setup
+# Database — PostgreSQL
 # ---------------------------------------------------------------------------
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DATABASE_NAME', 'freightcast'),
+        'USER': os.environ.get('DATABASE_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', ''),
+        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
+        'PORT': os.environ.get('DATABASE_PORT', '5432'),
     }
 }
 

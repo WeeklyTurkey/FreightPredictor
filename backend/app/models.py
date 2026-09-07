@@ -408,3 +408,22 @@ class Recommendation(models.Model):
 
     def __str__(self):
         return f"{self.signal} — {self.route} ({self.generated_at.date()})"
+
+
+class BunkerFuelPrice(models.Model):
+    """
+    Daily bunker fuel prices (Marine Gas Oil).
+    Used for plotting fuel price trends over time.
+    """
+
+    date = models.DateField(unique=True)
+    marine_gas_oil_usd = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        help_text="Marine Gas Oil price in USD per ton",
+    )
+
+    class Meta:
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"Bunker Fuel {self.date}: ${self.marine_gas_oil_usd}"
