@@ -12,6 +12,28 @@ or live API feeds without changing the interface.
 Usage:
     from app.forecasting import generate_forecast
     results = generate_forecast(route_id, vessel_class_id, commodity, horizon_days=90)
+
+External regressors (all read via the Django ORM, never from JSON files):
+    - bdi: MarketIndex(index_type='BDI') daily values.
+    - bunker: BunkerFuelPrice.marine_gas_oil_usd daily values (VLSFO,
+      kept current by load_real_data and fetch_market_prices).
+    - congestion: MacroFactor.port_congestion_index daily values (global
+      index — no per-port congestion history exists; Port traffic fields
+      are point-in-time snapshots only).
+    - weather_score: MacroFactor.seasonal_weather_impact (0–10) for
+      historical rows; WeatherData.weather_impact_score (0–10) for the
+      destination port on future rows.
+
+Missing-data strategy:
+    - History: regressors are joined on date; gaps of up to 7 days are
+      forward-filled, rows still incomplete are dropped. Fewer than 10
+      aligned rows → moving-average fallback (same as before).
+    - Future: BDI/bunker/congestion use the latest value available as of
+      the last historical date (forward-fill). Weather uses WeatherData
+      for the destination port when present; dates beyond its coverage
+      (e.g. 60/90-day horizons) reuse the latest seasonal score.
+    - Any regressor failure → plain Prophet without regressors, then
+      moving-average fallback, exactly as before.
 """
 
 import logging
@@ -61,12 +83,184 @@ def generate_forecast(route_id, vessel_class_id, commodity, horizon_days=90):
         )
         return _fallback_forecast(horizon_days)
 
-    # Try Prophet first, fall back to moving average
+    # Try Prophet with external regressors first, then plain Prophet,
+    # then moving-average fallback.
+    try:
+        return _prophet_with_regressors(df, route_id, horizon_days)
+    except Exception as exc:
+        logger.warning(
+            "Regressor-based forecast failed (%s), trying plain Prophet.", exc
+        )
+
     try:
         return _prophet_forecast(df, horizon_days)
     except Exception as exc:
         logger.warning("Prophet forecast failed (%s), using moving-average fallback.", exc)
         return _moving_average_forecast(df, horizon_days)
+
+
+REGRESSOR_COLUMNS = ['bdi', 'bunker', 'congestion', 'weather_score']
+
+# Maximum gap (days) filled by forward-fill when aligning regressors.
+REGRESSOR_FILL_LIMIT = 7
+
+# Minimum fully-aligned training rows required to fit Prophet with regressors.
+MIN_REGRESSOR_ROWS = 10
+
+
+def _order_bounds(predicted, lower, upper):
+    """
+    Enforce lower <= predicted <= upper on one prediction row.
+
+    All three values already come from the same Prophet prediction row; this
+    only repairs sub-cent inversions introduced by independent rounding, so
+    the stored interval always brackets the forecast.
+    """
+    return predicted, min(lower, predicted), max(upper, predicted)
+
+
+def _prophet_with_regressors(df, route_id, horizon_days):
+    """
+    Generate forecasts using Prophet with BDI, bunker, congestion and
+    weather external regressors.
+
+    Route-level mapping uses the route's destination port for weather data.
+
+    Raises:
+        Exception: On any missing-data or fitting problem; the caller falls
+            back to plain Prophet and then the moving-average forecast.
+    """
+    from prophet import Prophet
+
+    from app.models import (
+        BunkerFuelPrice, MacroFactor, MarketIndex, Route, WeatherData,
+    )
+
+    try:
+        destination_port_id = Route.objects.values_list(
+            'destination_port_id', flat=True
+        ).get(id=route_id)
+    except Route.DoesNotExist as exc:
+        raise ValueError(f"Route not found: {route_id}") from exc
+
+    history = df.copy()
+    history['date'] = pd.to_datetime(history['date']).dt.date
+    min_date = history['date'].min()
+    max_date = history['date'].max()
+
+    # --- Load regressor time series via the ORM (never from JSON) ---
+    bdi = {
+        row['date']: float(row['value'])
+        for row in MarketIndex.objects.filter(
+            index_type='BDI', date__gte=min_date, date__lte=max_date,
+        ).values('date', 'value')
+    }
+    macro = {
+        row['date']: row
+        for row in MacroFactor.objects.filter(
+            date__gte=min_date, date__lte=max_date,
+        ).values(
+            'date', 'port_congestion_index', 'seasonal_weather_impact',
+        )
+    }
+    vlsfo = {
+        row['date']: float(row['marine_gas_oil_usd'])
+        for row in BunkerFuelPrice.objects.filter(
+            date__gte=min_date, date__lte=max_date,
+        ).values('date', 'marine_gas_oil_usd')
+    }
+
+    aligned = pd.DataFrame({'date': sorted(history['date'].unique())})
+    aligned['bdi'] = aligned['date'].map(bdi)
+    aligned['bunker'] = aligned['date'].map(vlsfo)
+    aligned['congestion'] = aligned['date'].map(
+        lambda d: float(macro[d]['port_congestion_index']) if d in macro else None
+    )
+    aligned['weather_score'] = aligned['date'].map(
+        lambda d: float(macro[d]['seasonal_weather_impact']) if d in macro else None
+    )
+    aligned[REGRESSOR_COLUMNS] = aligned[REGRESSOR_COLUMNS].ffill(
+        limit=REGRESSOR_FILL_LIMIT
+    )
+
+    train = history.merge(aligned, on='date', how='left').dropna(
+        subset=REGRESSOR_COLUMNS
+    )
+    if len(train) < MIN_REGRESSOR_ROWS:
+        raise ValueError(
+            f"Only {len(train)} aligned regressor rows for route={route_id}; "
+            f"need at least {MIN_REGRESSOR_ROWS}."
+        )
+
+    # --- Standardize regressors with training statistics ---
+    means = train[REGRESSOR_COLUMNS].mean()
+    stds = train[REGRESSOR_COLUMNS].std().replace(0, 1)
+
+    prophet_df = train.rename(columns={'date': 'ds', 'rate_usd_per_ton': 'y'})
+    prophet_df['ds'] = pd.to_datetime(prophet_df['ds'])
+    prophet_df['y'] = prophet_df['y'].astype(float)
+    prophet_df[REGRESSOR_COLUMNS] = (
+        prophet_df[REGRESSOR_COLUMNS] - means
+    ) / stds
+
+    model = Prophet(
+        yearly_seasonality=True,
+        weekly_seasonality=False,
+        daily_seasonality=False,
+        changepoint_prior_scale=0.05,
+    )
+    for column in REGRESSOR_COLUMNS:
+        model.add_regressor(column)
+    model.fit(prophet_df)
+
+    # --- Future regressor values (no data leakage: nothing past max_date
+    # is used for training; future rows use forward-fill + synthetic weather) ---
+    last_bdi = train['bdi'].iloc[-1]
+    last_bunker = train['bunker'].iloc[-1]
+    last_congestion = train['congestion'].iloc[-1]
+    last_seasonal = train['weather_score'].iloc[-1]
+
+    future_weather = {
+        row['date']: float(row['weather_impact_score'])
+        for row in WeatherData.objects.filter(
+            port_id=destination_port_id, date__gt=max_date,
+        ).values('date', 'weather_impact_score')
+    }
+
+    future_dates = [max_date + timedelta(days=i) for i in range(1, horizon_days + 1)]
+    future = pd.DataFrame({
+        'ds': pd.to_datetime(future_dates),
+        'bdi': [(b - means['bdi']) / stds['bdi'] for b in [last_bdi] * horizon_days],
+        'bunker': [(b - means['bunker']) / stds['bunker'] for b in [last_bunker] * horizon_days],
+        'congestion': [
+            (c - means['congestion']) / stds['congestion']
+            for c in [last_congestion] * horizon_days
+        ],
+        'weather_score': [
+            (future_weather.get(d, last_seasonal) - means['weather_score'])
+            / stds['weather_score']
+            for d in future_dates
+        ],
+    })
+
+    prediction = model.predict(future)
+
+    results = []
+    for i, (_, row) in enumerate(prediction.iterrows()):
+        predicted, lower, upper = _order_bounds(
+            round(max(row['yhat'], 0), 2),
+            round(max(row['yhat_lower'], 0), 2),
+            round(max(row['yhat_upper'], 0), 2),
+        )
+        results.append({
+            'forecast_date': future_dates[i],
+            'predicted_rate': Decimal(str(predicted)),
+            'lower_bound': Decimal(str(lower)),
+            'upper_bound': Decimal(str(upper)),
+            'horizon_days': horizon_days,
+        })
+
+    return results
 
 
 def _prophet_forecast(df, horizon_days):
@@ -99,11 +293,16 @@ def _prophet_forecast(df, horizon_days):
 
     results = []
     for _, row in forecast_rows.iterrows():
+        predicted, lower, upper = _order_bounds(
+            round(max(row['yhat'], 0), 2),
+            round(max(row['yhat_lower'], 0), 2),
+            round(max(row['yhat_upper'], 0), 2),
+        )
         results.append({
             'forecast_date': row['ds'].date(),
-            'predicted_rate': Decimal(str(round(max(row['yhat'], 0), 2))),
-            'lower_bound': Decimal(str(round(max(row['yhat_lower'], 0), 2))),
-            'upper_bound': Decimal(str(round(max(row['yhat_upper'], 0), 2))),
+            'predicted_rate': Decimal(str(predicted)),
+            'lower_bound': Decimal(str(lower)),
+            'upper_bound': Decimal(str(upper)),
             'horizon_days': horizon_days,
         })
 

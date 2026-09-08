@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
  Filter,
@@ -12,13 +12,11 @@ import Navbar from '../components/Navbar';
 import RateChart from '../components/RateChart';
 import {
  getRoutes,
- getForecast,
  getRates,
  getVesselClasses,
  getCargoTypes,
- triggerForecastGeneration,
 } from '../api/freightService';
-import { Play } from 'lucide-react';
+import { matchesSelection } from '../api/forecastParams';
 
 export default function RateForecast() {
  const [searchParams, setSearchParams] = useSearchParams();
@@ -27,35 +25,65 @@ export default function RateForecast() {
  const [cargoTypes, setCargoTypes] = useState([]);
  const [selectedRouteId, setSelectedRouteId] = useState('');
  const [selectedVesselClass, setSelectedVesselClass] = useState('Capesize');
- const [selectedCargo, setSelectedCargo] = useState('');
+ // Explicit default: every selection must name a real commodity so no
+ // silent fallback can substitute another cargo's data.
+ const [selectedCargo, setSelectedCargo] = useState('Coking Coal');
  const [dateRange, setDateRange] = useState('2y');
  const [forecastData, setForecastData] = useState(null);
  const [loading, setLoading] = useState(true);
- const [generating, setGenerating] = useState(false);
- const [genMessage, setGenMessage] = useState('');
 
  useEffect(() => {
- getRoutes().then((routesData) => {
+ getRoutes()
+ .then((routesData) => {
  setRoutes(routesData);
  const routeParam = searchParams.get('route');
  const initialRoute = routeParam
  ? routesData.find((r) => r.id === routeParam)?.id || routesData[0]?.id
  : routesData[0]?.id;
  setSelectedRouteId(initialRoute || '');
- });
- getVesselClasses().then(setVesselClasses);
- getCargoTypes().then(setCargoTypes);
- }, []);
-
- useEffect(() => {
- if (!selectedRouteId) return;
- setLoading(true);
- const cargo = selectedCargo || 'coking_coal';
- getRates(selectedRouteId, selectedVesselClass, cargo).then((data) => {
- setForecastData(data);
+ })
+ .catch(() => {
+ setRoutes([]);
+ setSelectedRouteId('');
  setLoading(false);
  });
+ getVesselClasses().then(setVesselClasses).catch(() => setVesselClasses([]));
+ getCargoTypes().then(setCargoTypes).catch(() => setCargoTypes([]));
+ }, []);
+
+ const requestSeq = useRef(0);
+
+ useEffect(() => {
+ if (!selectedRouteId) {
+ // No route to query (e.g. failed bootstrap): never sit on the spinner.
+ setLoading(false);
+ return;
+ }
+ const seq = ++requestSeq.current;
+ let cancelled = false;
+ const run = async () => {
+ setLoading(true);
+ setForecastData(null);
+ try {
+ const cargo = selectedCargo || 'Coking Coal';
+ const data = await getRates(selectedRouteId, selectedVesselClass, cargo, 90);
+ if (cancelled || seq !== requestSeq.current) return;
+ // Render only data tagged for this exact selection.
+ if (!matchesSelection(data, { routeId: selectedRouteId, vesselClass: selectedVesselClass, commodity: cargo })) {
+ return;
+ }
+ setForecastData(data);
+ } finally {
+ if (!cancelled && seq === requestSeq.current) {
+ setLoading(false);
+ }
+ }
+ };
+ run();
  setSearchParams({ route: selectedRouteId });
+ return () => {
+ cancelled = true;
+ };
  }, [selectedRouteId, selectedVesselClass, selectedCargo]);
 
  const handleRouteChange = (e) => setSelectedRouteId(e.target.value);
@@ -67,10 +95,21 @@ export default function RateForecast() {
 
  const getFilteredData = () => {
  if (!forecastData) return null;
+ // Date-based filtering: works for any point cadence (daily live rows
+ // or weekly mock rows). The full forecast tail is always kept so the
+ // 90-day projection stays visible in every range.
  const ranges = { '6m': 180, '1y': 365, '2y': 730 };
  const days = ranges[dateRange] || 730;
- const histSlice = forecastData.historical?.slice(-days) || [];
- const combinedSlice = forecastData.combined?.slice(-(days + 90)) || [];
+ const allDates = (forecastData.historical || []).map((h) => h.date).sort();
+ const cutoff = allDates.length
+ ? new Date(new Date(allDates[allDates.length - 1]).getTime() - days * 86400000)
+ : null;
+ const inRange = (d) => !cutoff || new Date(d.date) >= cutoff;
+ const histSlice = (forecastData.historical || []).filter(inRange);
+ const histDates = new Set(histSlice.map((h) => h.date));
+ const combinedSlice = (forecastData.combined || []).filter(
+ (c) => histDates.has(c.date) || c.forecast != null
+ );
  return {
  ...forecastData,
  historical: histSlice,
@@ -79,22 +118,6 @@ export default function RateForecast() {
  };
 
  const filteredData = getFilteredData();
-
- const handleRunForecast = async () => {
- setGenerating(true);
- setGenMessage('');
- try {
- const res = await triggerForecastGeneration(selectedRouteId, 1, 'coking_coal', 90);
- setGenMessage(res.message || 'Generated Prophet forecast successfully!');
- // Refresh forecast chart data
- const data = await getRates(selectedRouteId, selectedVesselClass);
- setForecastData(data);
- } catch (err) {
- setGenMessage('Forecast generation complete.');
- } finally {
- setGenerating(false);
- }
- };
 
  return (
  <div className="min-h-screen">
@@ -106,24 +129,7 @@ export default function RateForecast() {
  <p className="text-sm text-slate-400 mt-1">Historical freight rates with 90-day Prophet forecast projections</p>
  </div>
  <div className="flex items-center gap-3">
- {genMessage && <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 border border-emerald-200">{genMessage}</span>}
- <button
- onClick={handleRunForecast}
- disabled={generating}
- className="btn-primary flex items-center gap-2 text-sm bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 shadow-sm font-medium transition-all"
- >
- {generating ? (
- <>
- <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
- Running Prophet ML...
- </>
- ) : (
- <>
- <Play className="w-4 h-4 fill-white" />
- Trigger Prophet ML Forecast
- </>
- )}
- </button>
+ <span className="text-xs text-slate-400">Auto-refreshes on selection change</span>
  </div>
  </div>
 
@@ -163,7 +169,6 @@ export default function RateForecast() {
  <Package className="w-3 h-3" /> Cargo Type
  </label>
  <select value={selectedCargo} onChange={handleCargoChange} className="w-full input-field text-sm">
- <option value="">All Cargo</option>
  {cargoTypes.map((cargo) => (
  <option key={cargo.id} value={cargo.name}>{cargo.name}</option>
  ))}
@@ -224,6 +229,24 @@ export default function RateForecast() {
  <Download className="w-4 h-4" /> Export
  </button>
  </div> */}
+ </div>
+ )}
+
+ {/* Explicit empty state: never another combination's data */}
+ {!loading && (!forecastData || forecastData.isEmpty) && (
+ <div className="card p-4 mb-6 border-amber-200 bg-amber-50/60">
+ <p className="text-xs text-amber-700">
+ No freight-rate data is available for this vessel and cargo combination.
+ </p>
+ </div>
+ )}
+
+ {/* Empty-forecast notice: history exists but no saved 90-day forecast */}
+ {!loading && forecastData && !forecastData.isEmpty && (!forecastData.forecast || forecastData.forecast.length === 0) && (
+ <div className="card p-4 mb-6 border-amber-200 bg-amber-50/60">
+ <p className="text-xs text-amber-700">
+ Historical rates are shown, but no saved 90-day forecast exists for this route / vessel / cargo combination yet.
+ </p>
  </div>
  )}
 

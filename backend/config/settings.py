@@ -1,13 +1,18 @@
 """
 Django settings for SIH26006 Freight Forecasting Platform.
 
-Uses SQLite (zero-setup), CORS for React frontend, and DRF for API layer.
+Uses PostgreSQL, CORS for React frontend, and DRF for API layer.
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -68,13 +73,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # ---------------------------------------------------------------------------
-# Database — SQLite for demo, zero setup
+# Database — PostgreSQL
 # ---------------------------------------------------------------------------
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DATABASE_NAME', 'freightcast'),
+        'USER': os.environ.get('DATABASE_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', ''),
+        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
+        'PORT': os.environ.get('DATABASE_PORT', '5432'),
     }
 }
 
@@ -138,3 +147,17 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True  # Fine for demo; restrict in production
 CORS_ALLOW_CREDENTIALS = True
+
+
+# ---------------------------------------------------------------------------
+# OilPriceAPI — live BDI / VLSFO ingestion (manual: fetch_market_prices)
+# Token lives only in the OILPRICEAPI_TOKEN environment variable and is
+# never logged or exposed through the API.
+# ---------------------------------------------------------------------------
+
+OILPRICEAPI_ENABLED = os.environ.get('OILPRICEAPI_ENABLED', 'true').lower() == 'true'
+OILPRICEAPI_BASE_URL = os.environ.get(
+    'OILPRICEAPI_BASE_URL', 'https://api.oilpriceapi.com'
+)
+OILPRICEAPI_TOKEN = os.environ.get('OILPRICEAPI_TOKEN', '')
+OILPRICEAPI_TIMEOUT_SECONDS = int(os.environ.get('OILPRICEAPI_TIMEOUT', '10'))

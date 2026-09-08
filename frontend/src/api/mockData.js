@@ -165,10 +165,33 @@ export const mockVesselClasses = [
 ];
 
 // --- Generate historical weekly rate data (past 2 years) ---
-function generateHistoricalRates(baseRate, volatility = 0.08) {
+// Deterministic per seed so each route keeps a stable, distinct shape
+// across reloads instead of one reshuffled shared series.
+function seededRandom(seed) {
+  let state = seed >>> 0;
+  return () => {
+    state |= 0;
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hashString(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function generateHistoricalRates(baseRate, volatility = 0.08, seed = 1) {
   const data = [];
   const today = new Date();
   const weeks = 104; // 2 years
+  const rand = seededRandom(seed);
   let rate = baseRate * 0.82;
 
   for (let i = weeks; i >= 0; i--) {
@@ -180,7 +203,7 @@ function generateHistoricalRates(baseRate, volatility = 0.08) {
     const seasonalFactor = (month >= 5 && month <= 8) ? 1.12 : (month >= 9 && month <= 11) ? 1.06 : 0.96;
 
     // Random walk with mean reversion
-    const noise = (Math.random() - 0.5) * 2 * volatility * baseRate;
+    const noise = (rand() - 0.5) * 2 * volatility * baseRate;
     const meanReversion = (baseRate - rate) * 0.05;
     rate = rate + meanReversion + noise;
     rate = Math.max(rate, baseRate * 0.6);
@@ -197,10 +220,11 @@ function generateHistoricalRates(baseRate, volatility = 0.08) {
 }
 
 // --- Generate 90-day Prophet-style forecast ---
-function generateForecast(historicalData, baseRate) {
+function generateForecast(historicalData, baseRate, seed = 1) {
   const forecast = [];
   const lastDate = new Date(historicalData[historicalData.length - 1].date);
   const lastRate = historicalData[historicalData.length - 1].rate;
+  const rand = seededRandom(seed);
 
   // Trend projection with slight upward bias
   const trendSlope = 0.0015 * baseRate;
@@ -209,12 +233,16 @@ function generateForecast(historicalData, baseRate) {
     const date = new Date(lastDate);
     date.setDate(date.getDate() + i * 7);
 
-    const projected = lastRate + trendSlope * i + (Math.random() - 0.45) * baseRate * 0.03;
+    const projected = lastRate + trendSlope * i + (rand() - 0.45) * baseRate * 0.03;
     const uncertainty = baseRate * 0.04 * Math.sqrt(i); // widening cone
 
+    const rounded = Math.round(projected * 100) / 100;
     forecast.push({
       date: date.toISOString().split('T')[0],
-      forecast: Math.round(projected * 100) / 100,
+      forecast: rounded,
+      // Mirror of `forecast` for components reading the live API shape
+      // (live rows expose `predictedRate`; see freightService.getRates).
+      predictedRate: rounded,
       upper_bound: Math.round((projected + uncertainty) * 100) / 100,
       lower_bound: Math.round((projected - uncertainty) * 100) / 100,
     });
@@ -225,8 +253,8 @@ function generateForecast(historicalData, baseRate) {
 // --- Build forecast data per route ---
 export const mockForecast = {};
 mockRoutes.forEach((route) => {
-  const historical = generateHistoricalRates(route.current_rate);
-  const forecast = generateForecast(historical, route.current_rate);
+  const historical = generateHistoricalRates(route.current_rate, 0.08, hashString(route.id));
+  const forecast = generateForecast(historical, route.current_rate, hashString(`${route.id}:forecast`));
   mockForecast[route.id] = {
     route_id: route.id,
     route_name: `${route.origin_port} → ${route.destination_port}`,
@@ -895,6 +923,62 @@ export const mockCargoTypes = [
   { id: 'cargo_004', name: 'Limestone', unit: 'MT', avg_density: 1.55, stowage_factor: 0.65 },
 ];
 
+// --- BDI (Baltic Dry Index) ---
+const mockBdiHistory = (() => {
+  const points = [];
+  let value = 1690;
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    value += Math.round((Math.random() - 0.45) * 60);
+    points.push({
+      date: d.toISOString().split('T')[0],
+      value,
+      source: 'synthetic',
+    });
+  }
+  return points;
+})();
+
+export const mockBdi = {
+  latest: {
+    value: mockBdiHistory[mockBdiHistory.length - 1].value,
+    change_pct: 2.6,
+    date: mockBdiHistory[mockBdiHistory.length - 1].date,
+    source: 'synthetic',
+  },
+  history: mockBdiHistory,
+};
+
+// --- VLSFO (VLSFO bunker fuel, USD/MT) ---
+const mockVlsfoHistory = (() => {
+  const points = [];
+  let value = 640;
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    value += Math.round((Math.random() - 0.55) * 14);
+    points.push({
+      date: d.toISOString().split('T')[0],
+      value,
+      source: 'synthetic',
+    });
+  }
+  return points;
+})();
+
+export const mockVlsfo = {
+  latest: {
+    value: mockVlsfoHistory[mockVlsfoHistory.length - 1].value,
+    unit: '$/MT',
+    currency: 'USD',
+    change_pct: -1.3,
+    date: mockVlsfoHistory[mockVlsfoHistory.length - 1].date,
+    source: 'synthetic',
+  },
+  history: mockVlsfoHistory,
+};
+
 // --- Scenario Simulation ---
 export function simulateScenario(volumeMt, laycanWeeks, routeId, charterType) {
   const route = mockRoutes.find((r) => r.id === routeId) || mockRoutes[0];
@@ -902,26 +986,33 @@ export function simulateScenario(volumeMt, laycanWeeks, routeId, charterType) {
   const baseRate = route.current_rate;
   const projectedRate = rec ? rec.projected_rate_30d : baseRate * 1.05;
 
-  // Spot cost = current rate with volatility premium
-  const spotRate = baseRate * 1.03;
+  const transitDays = route.avg_transit_days + laycanWeeks * 7;
+
+  // ── Spot / Voyage Charter ──
+  // You pay a per-MT freight rate (which already includes the shipowner's
+  // vessel operating costs). Longer laycan windows add demurrage risk.
+  const demurragePremium = Math.max(0, (laycanWeeks - 2) * 0.40);
+  const spotRate = baseRate * 1.03 + demurragePremium;
   const spotCost = volumeMt * spotRate;
 
-  // Time charter cost = hire rate * duration + bunker + port charges
+  // ── Time Charter ──
+  // You hire the whole vessel at a daily rate and pay bunker + port yourself.
+  // There is NO separate per-MT freight charge — you "own" the capacity.
+  // TC is economical when cargo volume is large enough to spread the fixed
+  // daily cost over many tons.
   const vesselClass = mockVesselClasses.find((vc) => vc.name === 'Capesize');
-  const transitDays = route.avg_transit_days + laycanWeeks * 7;
   const hireCost = vesselClass.daily_hire_rate * transitDays;
   const bunkerCost = vesselClass.daily_consumption_mt * 612 * transitDays;
   const portCharges = 45000 * 2; // load + discharge
   const tcCost = hireCost + bunkerCost + portCharges;
 
-  const savings = charterType === 'spot' ? spotCost - tcCost : tcCost - spotCost;
-  const savingsPct = charterType === 'spot'
-    ? ((spotCost - tcCost) / spotCost) * 100
-    : ((tcCost - spotCost) / tcCost) * 100;
+  const savings = spotCost - tcCost;
+  const refCost = Math.max(spotCost, tcCost);
+  const savingsPct = refCost > 0 ? (savings / refCost) * 100 : 0;
 
   return {
     spot: {
-      rate: spotRate,
+      rate: Math.round(spotRate * 100) / 100,
       total_cost: Math.round(spotCost),
       cost_per_mt: Math.round((spotCost / volumeMt) * 100) / 100,
     },

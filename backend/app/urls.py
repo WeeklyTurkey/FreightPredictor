@@ -4,6 +4,8 @@ SIH26006 Freight Forecasting Platform — All API Endpoints
 Base URL: /api/v1/
 
 Endpoints:
+  GET    /weather/                        — List per-port weather observations
+  GET    /weather/<id>/                   — Weather detail
   GET    /ports/                          — List all ports
   GET    /ports/<id>/                     — Port detail
   GET    /vessels/                        — List vessel classes
@@ -22,6 +24,8 @@ Endpoints:
   GET    /market-indices/latest/          — Latest index values
   GET    /macro-factors/                  — List macro factors
   GET    /macro-factors/latest/           — Latest macro factor values
+  GET    /bunker-fuel-prices/             — List VLSFO prices
+  GET    /bunker-fuel-prices/latest/      — Latest VLSFO price
   POST   /cost-breakdown/                — Calculate detailed landed cost
   POST   /recommendation/                — Generate buy/wait/delay recommendation
   POST   /port-feasibility/              — Check port/vessel compatibility
@@ -36,6 +40,7 @@ from app.views import (
     PortViewSet, VesselViewSet, RouteViewSet,
     FreightRateHistoryViewSet, ForecastViewSet,
     ChartererViewSet, MarketIndexViewSet, MacroFactorViewSet,
+    BunkerFuelPriceViewSet, WeatherDataViewSet,
     GenerateForecastView, CalculateCostView,
     GenerateRecommendationView, PortFeasibilityView,
     PortTrafficView, DashboardSummaryView,
@@ -50,11 +55,10 @@ router.register(r'forecasts', ForecastViewSet, basename='forecast')
 router.register(r'charterers', ChartererViewSet, basename='charterer')
 router.register(r'market-indices', MarketIndexViewSet, basename='market-index')
 router.register(r'macro-factors', MacroFactorViewSet, basename='macro-factor')
+router.register(r'bunker-fuel-prices', BunkerFuelPriceViewSet, basename='bunker-fuel-price')
+router.register(r'weather', WeatherDataViewSet, basename='weather')
 
 urlpatterns = [
-    # ViewSet routes
-    path('', include(router.urls)),
-
     # Action endpoints (POST)
     path('forecasts/generate/', GenerateForecastView.as_view(), name='generate-forecast'),
     path('cost-breakdown/', CalculateCostView.as_view(), name='calculate-cost'),
@@ -64,4 +68,7 @@ urlpatterns = [
     # Read-only computed endpoints (GET)
     path('port-traffic/', PortTrafficView.as_view(), name='port-traffic'),
     path('dashboard/', DashboardSummaryView.as_view(), name='dashboard-summary'),
+
+    # ViewSet routes (Catch-all)
+    path('', include(router.urls)),
 ]

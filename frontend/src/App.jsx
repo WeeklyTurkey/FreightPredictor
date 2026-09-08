@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Overview from './pages/Overview';
 import ActiveVoyages from './pages/ActiveVoyages';
 import PortStatus from './pages/PortStatus';
@@ -9,6 +9,7 @@ import TopRecommendations from './pages/TopRecommendations';
 import ScenarioSimulator from './pages/ScenarioSimulator';
 import Charterers from './pages/Charterers';
 import GraphDetails from './pages/GraphDetails';
+import IndexGraph from './pages/IndexGraph';
 
 function App() {
  return (
@@ -24,6 +25,9 @@ function App() {
  <Route path="/rates/forecast" element={<RateForecast />} />
  <Route path="/rates/breakdown" element={<RateBreakdown />} />
  <Route path="/rates/graph" element={<GraphDetails />} />
+ <Route path="/rates/index-graph" element={<IndexGraph />} />
+ <Route path="/rates/bdi" element={<Navigate to="/rates/index-graph?type=BDI" replace />} />
+ <Route path="/rates/vlsfo" element={<Navigate to="/rates/index-graph?type=VLSFO" replace />} />
 
  {/* Recommendations Pages */}
  <Route path="/recommendations/picks" element={<TopRecommendations />} />

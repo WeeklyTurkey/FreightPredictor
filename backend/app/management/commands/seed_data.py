@@ -1,7 +1,7 @@
 """
 SIH26006 — seed_data management command
 
-Loads synthetic JSON files from data/synthetic/ into the SQLite database.
+Loads synthetic JSON files from data/synthetic/ into the database.
 Also computes trust scores after loading charterers.
 
 Usage:

@@ -34,14 +34,25 @@ export default function MetricCard({ icon: Icon, label, value, unit, changePct, 
     return data;
   }, [trend, chartData]);
 
+  const handleActivate = () => {
+    if (linkTo) { navigate(linkTo); return; }
+    if (!disableGraph) setIsGraphExpanded(!isGraphExpanded);
+  };
+
   return (
-    <div 
+    <div
       ref={cardRef}
-      className={`card card-hover p-5 animate-fade-in transition-all duration-300 flex flex-col relative ${(disableGraph && !linkTo) ? '' : 'cursor-pointer'}`}
-      onClick={() => {
-        if (linkTo) { navigate(linkTo); return; }
-        if (!disableGraph) setIsGraphExpanded(!isGraphExpanded);
+      className={`card card-hover p-5 animate-fade-in transition-all duration-300 flex flex-col relative ${(disableGraph && !linkTo) ? '' : 'cursor-pointer'} ${linkTo ? 'focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-2 hover:border-teal-200' : ''}`}
+      onClick={handleActivate}
+      onKeyDown={(e) => {
+        if (linkTo && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          handleActivate();
+        }
       }}
+      role={linkTo ? 'link' : undefined}
+      tabIndex={linkTo ? 0 : undefined}
+      aria-label={linkTo ? `${label}: open details` : undefined}
       title={linkTo ? 'Click to view graph details' : (disableGraph ? undefined : 'Click to toggle expanded chart')}
     >
       <div className="flex items-start justify-between mb-2">

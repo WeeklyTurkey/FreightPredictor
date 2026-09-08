@@ -10,6 +10,7 @@ from rest_framework import serializers
 from app.models import (
     Port, Vessel, Route, FreightRateHistory, Forecast,
     Charterer, MarketIndex, MacroFactor, CostBreakdown, Recommendation,
+    BunkerFuelPrice, WeatherData,
 )
 
 
@@ -130,6 +131,20 @@ class MarketIndexSerializer(serializers.ModelSerializer):
 class MacroFactorSerializer(serializers.ModelSerializer):
     class Meta:
         model = MacroFactor
+        fields = '__all__'
+
+
+class BunkerFuelPriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BunkerFuelPrice
+        fields = '__all__'
+
+
+class WeatherDataSerializer(serializers.ModelSerializer):
+    port_name = serializers.CharField(source='port.name', read_only=True)
+
+    class Meta:
+        model = WeatherData
         fields = '__all__'
 
 

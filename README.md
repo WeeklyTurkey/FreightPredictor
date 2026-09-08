@@ -40,7 +40,7 @@ FreightCast is a comprehensive full-stack platform designed to revolutionize the
 - **Frontend**: React.js, Vite, Tailwind CSS, Recharts (for data visualization), Lucide Icons.
 - **Backend**: Django, Django REST Framework.
 - **Machine Learning**: Python, Facebook Prophet (Time-series forecasting), Pandas, NumPy.
-- **Database**: SQLite (Development) with fully automated synthetic data seeding.
+- **Database**: PostgreSQL with fully automated synthetic data seeding.
 
 ---
 
@@ -51,8 +51,26 @@ FreightCast is a comprehensive full-stack platform designed to revolutionize the
 - Python 3.10+
 - Node.js 18+
 - npm or yarn
+- PostgreSQL 14+
 
-### 1. Backend Setup
+### 1. PostgreSQL Setup
+
+Create the database:
+
+```bash
+# Start PostgreSQL (if not already running)
+brew services start postgresql@16   # macOS (Homebrew)
+# OR: sudo systemctl start postgresql   # Linux
+
+# Create the database
+createdb freightcast
+
+# (Optional) Create a dedicated user
+# psql -c "CREATE USER freightuser WITH PASSWORD 'your_password';"
+# psql -c "GRANT ALL PRIVILEGES ON DATABASE freightcast TO freightuser;"
+```
+
+### 2. Backend Setup
 
 Open a terminal and navigate to the `backend/` directory:
 
@@ -63,13 +81,22 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
+# Configure Environment Variables
+cp .env.example .env
+# Edit .env with your PostgreSQL credentials (DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, etc.)
+
+# Export environment variables
+export $(grep -v '^#' .env | xargs)
+
 # Install Dependencies
 pip install -r requirements.txt
 
-# Generate Synthetic Data & Seed the Database (Runs ML models, takes ~1 min)
-python scripts/generate_synthetic_data.py
+# Run Migrations (creates schema in PostgreSQL)
 python manage.py makemigrations app
 python manage.py migrate
+
+# Generate Synthetic Data & Seed the Database (Runs ML models, takes ~1 min)
+python scripts/generate_synthetic_data.py
 python manage.py seed_data
 
 # Run the Development Server
@@ -77,7 +104,7 @@ python manage.py runserver 8000
 ```
 The backend API will be available at `http://localhost:8000/api/v1/`.
 
-### 2. Frontend Setup
+### 3. Frontend Setup
 
 Open a **new** terminal window and navigate to the `frontend/` directory:
 
@@ -91,3 +118,4 @@ npm install
 npm run dev
 ```
 The application will be live at `http://localhost:5173/`.
+
