@@ -15,7 +15,8 @@ Usage:
 
 External regressors (all read via the Django ORM, never from JSON files):
     - bdi: MarketIndex(index_type='BDI') daily values.
-    - bunker: MacroFactor.bunker_fuel_price_usd daily values.
+    - bunker: BunkerFuelPrice.marine_gas_oil_usd daily values (VLSFO,
+      kept current by load_real_data and fetch_market_prices).
     - congestion: MacroFactor.port_congestion_index daily values (global
       index — no per-port congestion history exists; Port traffic fields
       are point-in-time snapshots only).
@@ -107,6 +108,17 @@ REGRESSOR_FILL_LIMIT = 7
 MIN_REGRESSOR_ROWS = 10
 
 
+def _order_bounds(predicted, lower, upper):
+    """
+    Enforce lower <= predicted <= upper on one prediction row.
+
+    All three values already come from the same Prophet prediction row; this
+    only repairs sub-cent inversions introduced by independent rounding, so
+    the stored interval always brackets the forecast.
+    """
+    return predicted, min(lower, predicted), max(upper, predicted)
+
+
 def _prophet_with_regressors(df, route_id, horizon_days):
     """
     Generate forecasts using Prophet with BDI, bunker, congestion and
@@ -120,7 +132,9 @@ def _prophet_with_regressors(df, route_id, horizon_days):
     """
     from prophet import Prophet
 
-    from app.models import MacroFactor, MarketIndex, Route, WeatherData
+    from app.models import (
+        BunkerFuelPrice, MacroFactor, MarketIndex, Route, WeatherData,
+    )
 
     try:
         destination_port_id = Route.objects.values_list(
@@ -146,16 +160,19 @@ def _prophet_with_regressors(df, route_id, horizon_days):
         for row in MacroFactor.objects.filter(
             date__gte=min_date, date__lte=max_date,
         ).values(
-            'date', 'bunker_fuel_price_usd',
-            'port_congestion_index', 'seasonal_weather_impact',
+            'date', 'port_congestion_index', 'seasonal_weather_impact',
         )
+    }
+    vlsfo = {
+        row['date']: float(row['marine_gas_oil_usd'])
+        for row in BunkerFuelPrice.objects.filter(
+            date__gte=min_date, date__lte=max_date,
+        ).values('date', 'marine_gas_oil_usd')
     }
 
     aligned = pd.DataFrame({'date': sorted(history['date'].unique())})
     aligned['bdi'] = aligned['date'].map(bdi)
-    aligned['bunker'] = aligned['date'].map(
-        lambda d: float(macro[d]['bunker_fuel_price_usd']) if d in macro else None
-    )
+    aligned['bunker'] = aligned['date'].map(vlsfo)
     aligned['congestion'] = aligned['date'].map(
         lambda d: float(macro[d]['port_congestion_index']) if d in macro else None
     )
@@ -230,11 +247,16 @@ def _prophet_with_regressors(df, route_id, horizon_days):
 
     results = []
     for i, (_, row) in enumerate(prediction.iterrows()):
+        predicted, lower, upper = _order_bounds(
+            round(max(row['yhat'], 0), 2),
+            round(max(row['yhat_lower'], 0), 2),
+            round(max(row['yhat_upper'], 0), 2),
+        )
         results.append({
             'forecast_date': future_dates[i],
-            'predicted_rate': Decimal(str(round(max(row['yhat'], 0), 2))),
-            'lower_bound': Decimal(str(round(max(row['yhat_lower'], 0), 2))),
-            'upper_bound': Decimal(str(round(max(row['yhat_upper'], 0), 2))),
+            'predicted_rate': Decimal(str(predicted)),
+            'lower_bound': Decimal(str(lower)),
+            'upper_bound': Decimal(str(upper)),
             'horizon_days': horizon_days,
         })
 
@@ -271,11 +293,16 @@ def _prophet_forecast(df, horizon_days):
 
     results = []
     for _, row in forecast_rows.iterrows():
+        predicted, lower, upper = _order_bounds(
+            round(max(row['yhat'], 0), 2),
+            round(max(row['yhat_lower'], 0), 2),
+            round(max(row['yhat_upper'], 0), 2),
+        )
         results.append({
             'forecast_date': row['ds'].date(),
-            'predicted_rate': Decimal(str(round(max(row['yhat'], 0), 2))),
-            'lower_bound': Decimal(str(round(max(row['yhat_lower'], 0), 2))),
-            'upper_bound': Decimal(str(round(max(row['yhat_upper'], 0), 2))),
+            'predicted_rate': Decimal(str(predicted)),
+            'lower_bound': Decimal(str(lower)),
+            'upper_bound': Decimal(str(upper)),
             'horizon_days': horizon_days,
         })
 

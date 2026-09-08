@@ -5,6 +5,8 @@ import PortStatus from './pages/PortStatus';
 import FleetReadiness from './pages/FleetReadiness';
 import RateForecast from './pages/RateForecast';
 import RateBreakdown from './pages/RateBreakdown';
+import Bdi from './pages/Bdi';
+import Vlsfo from './pages/Vlsfo';
 import TopRecommendations from './pages/TopRecommendations';
 import ScenarioSimulator from './pages/ScenarioSimulator';
 import Charterers from './pages/Charterers';
@@ -24,6 +26,8 @@ function App() {
  <Route path="/rates/forecast" element={<RateForecast />} />
  <Route path="/rates/breakdown" element={<RateBreakdown />} />
  <Route path="/rates/graph" element={<GraphDetails />} />
+ <Route path="/rates/bdi" element={<Bdi />} />
+ <Route path="/rates/vlsfo" element={<Vlsfo />} />
 
  {/* Recommendations Pages */}
  <Route path="/recommendations/picks" element={<TopRecommendations />} />

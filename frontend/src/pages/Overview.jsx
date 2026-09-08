@@ -87,6 +87,7 @@ export default function Overview() {
  subtitle={`Capesize: ${kpis.baltic_dry_index.components.capesize.toLocaleString()}`}
  chartData={kpis.baltic_dry_index.historical || null}
  disableGraph={true}
+ linkTo="/rates/bdi"
  />
  <MetricCard
  label="VLSFO Singapore"
@@ -97,6 +98,7 @@ export default function Overview() {
  subtitle={`Fujairah: $${kpis.bunker_fuel.vlsfo_fujairah.value}/MT`}
  chartData={kpis.bunker_fuel.vlsfo_singapore.historical || null}
  disableGraph={true}
+ linkTo="/rates/vlsfo"
  />
  <MetricCard
  icon={Ship}

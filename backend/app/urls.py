@@ -24,6 +24,8 @@ Endpoints:
   GET    /market-indices/latest/          — Latest index values
   GET    /macro-factors/                  — List macro factors
   GET    /macro-factors/latest/           — Latest macro factor values
+  GET    /bunker-fuel-prices/             — List VLSFO prices
+  GET    /bunker-fuel-prices/latest/      — Latest VLSFO price
   POST   /cost-breakdown/                — Calculate detailed landed cost
   POST   /recommendation/                — Generate buy/wait/delay recommendation
   POST   /port-feasibility/              — Check port/vessel compatibility

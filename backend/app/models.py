@@ -299,6 +299,11 @@ class MarketIndex(models.Model):
         help_text="24-hour percentage change",
         default=0,
     )
+    source = models.CharField(
+        max_length=20,
+        default='synthetic',
+        help_text="Data source: 'synthetic' or 'oilpriceapi'",
+    )
 
     class Meta:
         ordering = ['-date']
@@ -413,14 +418,21 @@ class Recommendation(models.Model):
 
 class BunkerFuelPrice(models.Model):
     """
-    Daily bunker fuel prices (Marine Gas Oil).
-    Used for plotting fuel price trends over time.
+    Daily VLSFO bunker fuel prices.
+    Used for plotting fuel price trends over time and as the Prophet
+    bunker-fuel regressor in forecasting.py.
+    (Field keeps its historic name marine_gas_oil_usd.)
     """
 
     date = models.DateField(unique=True)
     marine_gas_oil_usd = models.DecimalField(
         max_digits=10, decimal_places=2,
-        help_text="Marine Gas Oil price in USD per ton",
+        help_text="VLSFO price in USD per ton",
+    )
+    source = models.CharField(
+        max_length=20,
+        default='synthetic',
+        help_text="Data source: 'synthetic' or 'oilpriceapi'",
     )
 
     class Meta:

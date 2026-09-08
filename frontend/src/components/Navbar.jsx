@@ -10,6 +10,7 @@ import {
   Activity,
   Anchor,
   Gauge,
+  Fuel,
   Calculator,
   Shield,
   Search,
@@ -39,6 +40,8 @@ const navSections = [
     items: [
       { label: 'ML Forecast', desc: '90-day Prophet projections', path: '/rates/forecast', icon: TrendingUp },
       { label: 'Rate Breakdown', desc: 'Base freight vs BAF analysis', path: '/rates/breakdown', icon: Table },
+      { label: 'BDI', desc: 'Baltic Dry Index daily trends', path: '/rates/bdi', icon: Activity },
+      { label: 'VLSFO', desc: 'VLSFO bunker fuel price trends', path: '/rates/vlsfo', icon: Fuel },
     ],
   },
   {

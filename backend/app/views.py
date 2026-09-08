@@ -171,12 +171,27 @@ class GenerateForecastView(APIView):
         serializer = ForecastRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        # Validate target rows up front so an unknown route/vessel gets a
+        # clear 404 instead of a late foreign-key failure after generation.
+        route_id = serializer.validated_data['route_id']
+        vessel_class_id = serializer.validated_data['vessel_class_id']
+        if not Route.objects.filter(id=route_id).exists():
+            return Response(
+                {'status': 'error', 'message': f'Route not found: {route_id}.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if not Vessel.objects.filter(id=vessel_class_id).exists():
+            return Response(
+                {'status': 'error', 'message': f'Vessel class not found: {vessel_class_id}.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         from app.forecasting import save_forecasts
 
         try:
             count = save_forecasts(
-                route_id=serializer.validated_data['route_id'],
-                vessel_class_id=serializer.validated_data['vessel_class_id'],
+                route_id=route_id,
+                vessel_class_id=vessel_class_id,
                 commodity=serializer.validated_data['commodity'],
                 horizon_days=int(serializer.validated_data['horizon_days']),
             )
@@ -392,6 +407,16 @@ class BunkerFuelPriceViewSet(viewsets.ReadOnlyModelViewSet):
             qs = qs.filter(date__lte=date_to)
         return qs
 
+    @action(detail=False, methods=['get'], url_path='latest')
+    def latest(self, request):
+        """Get the most recent VLSFO price (live row when ingested)."""
+        latest = BunkerFuelPrice.objects.order_by('-date').first()
+        if latest:
+            return Response(BunkerFuelPriceSerializer(latest).data)
+        return Response(
+            {'message': 'No bunker fuel data available.'}, status=404
+        )
+
 
 class WeatherDataViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -560,6 +585,7 @@ class DashboardSummaryView(APIView):
                     'value': str(latest.value),
                     'change_pct_24h': str(latest.change_pct_24h),
                     'date': latest.date.isoformat(),
+                    'source': latest.source,
                 })
 
         # Latest macro factors
@@ -578,10 +604,21 @@ class DashboardSummaryView(APIView):
             'id', 'name', 'ships_currently_at_port', 'expected_incoming_shipments',
         ))
 
+        # Latest VLSFO (live row when fetch_market_prices has run)
+        latest_fuel = BunkerFuelPrice.objects.order_by('-date').first()
+        fuel_data = None
+        if latest_fuel:
+            fuel_data = {
+                'marine_gas_oil_usd': str(latest_fuel.marine_gas_oil_usd),
+                'date': latest_fuel.date.isoformat(),
+                'source': latest_fuel.source,
+            }
+
         # Counts
         summary = {
             'market_indices': market_indices,
             'macro_factors': macro_data,
+            'bunker_fuel_latest': fuel_data,
             'port_traffic': port_traffic,
             'total_routes': Route.objects.count(),
             'total_charterers': Charterer.objects.count(),

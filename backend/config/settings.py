@@ -143,3 +143,17 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True  # Fine for demo; restrict in production
 CORS_ALLOW_CREDENTIALS = True
+
+
+# ---------------------------------------------------------------------------
+# OilPriceAPI — live BDI / VLSFO ingestion (manual: fetch_market_prices)
+# Token lives only in the OILPRICEAPI_TOKEN environment variable and is
+# never logged or exposed through the API.
+# ---------------------------------------------------------------------------
+
+OILPRICEAPI_ENABLED = os.environ.get('OILPRICEAPI_ENABLED', 'true').lower() == 'true'
+OILPRICEAPI_BASE_URL = os.environ.get(
+    'OILPRICEAPI_BASE_URL', 'https://api.oilpriceapi.com'
+)
+OILPRICEAPI_TOKEN = os.environ.get('OILPRICEAPI_TOKEN', '')
+OILPRICEAPI_TIMEOUT_SECONDS = int(os.environ.get('OILPRICEAPI_TIMEOUT', '10'))

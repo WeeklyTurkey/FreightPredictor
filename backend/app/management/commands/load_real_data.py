@@ -1,7 +1,7 @@
 """
 Load real-world data from JSON files into the database:
   1. Baltic Dry Index → MarketIndex (index_type='BDI')
-  2. Daily Bunker Fuel Prices (Marine Gas Oil) → BunkerFuelPrice
+  2. Daily VLSFO Fuel Prices → BunkerFuelPrice.marine_gas_oil_usd
 
 Usage:
     python manage.py load_real_data
@@ -98,7 +98,7 @@ class Command(BaseCommand):
         ))
 
     def _load_bunker_fuel(self, filepath):
-        """Load Marine Gas Oil prices into BunkerFuelPrice."""
+        """Load VLSFO prices into BunkerFuelPrice.marine_gas_oil_usd."""
         if not filepath.exists():
             self.stdout.write(self.style.WARNING(f"  [WARN] Bunker fuel file not found: {filepath}"))
             return
@@ -114,8 +114,11 @@ class Command(BaseCommand):
                 # Parse date: "01/29/2019" → MM/DD/YYYY
                 date = datetime.strptime(record['Day'], '%m/%d/%Y').date()
 
-                # Parse Marine Gas Oil price: "$636.5" or "$1,444.5"
-                price_str = record.get('Marine Gas Oil', '').strip()
+                # Parse VLSFO price: "$542.00" or "$1,444.5"
+                # (DB field keeps its historic name marine_gas_oil_usd.)
+                price_str = record.get(
+                    'VLSFO Fuel Oil, IMO 2020 Grade, 0.5%', ''
+                ).strip()
                 if not price_str or price_str == '':
                     skipped += 1
                     continue
@@ -127,11 +130,11 @@ class Command(BaseCommand):
                     date=date,
                     marine_gas_oil_usd=price,
                 ))
-            except (ValueError, KeyError, InvalidOperation) as e:
+            except (ValueError, KeyError, InvalidOperation, AttributeError) as e:
                 skipped += 1
                 logger.debug("Skipped bunker fuel record: %s (%s)", record, e)
 
         BunkerFuelPrice.objects.bulk_create(objects, ignore_conflicts=True)
         self.stdout.write(self.style.SUCCESS(
-            f"  [OK] Bunker fuel (Marine Gas Oil): {len(objects)} loaded ({skipped} skipped)"
+            f"  [OK] Bunker fuel (VLSFO): {len(objects)} loaded ({skipped} skipped)"
         ))

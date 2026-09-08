@@ -49,7 +49,7 @@ The data layer is structured in two major sections within `app/models.py`:
 
 ## 🔌 API Conventions & Key Endpoints
 - Base: `/api/v1/`. Read endpoints are DRF `ReadOnlyModelViewSet`s (paginated `{results, next}`); use `fetchAllPages`/`unwrapDRF` when consuming them.
-- Reads: `ports/`, `vessels/`, `routes/`, `rates/`, `forecasts/`, `charterers/`, `market-indices/`, `macro-factors/`, `bunker-fuel-prices/` (+ `market-indices/latest/`, `macro-factors/latest/`, `port-traffic/`, `dashboard/`).
+- Reads: `ports/`, `vessels/`, `routes/`, `rates/`, `forecasts/`, `charterers/`, `market-indices/`, `macro-factors/`, `bunker-fuel-prices/` (+ `market-indices/latest/`, `macro-factors/latest/`, `bunker-fuel-prices/latest/`, `weather/`, `port-traffic/`, `dashboard/`). `MarketIndex`/`BunkerFuelPrice` rows carry `source` (`synthetic`/`oilpriceapi`); live values ingested via `manage.py fetch_market_prices` (token: `OILPRICEAPI_TOKEN` env only).
 - POST actions: `forecasts/generate/` (`route_id, vessel_class_id, commodity, horizon_days=30|60|90`), `cost-breakdown/` and `recommendation/` (`route_id, vessel_class_id, commodity, volume_mt`), `port-feasibility/` (`destination_port_id, vessel_class_id, volume_mt`), `charterers/recalculate-scores/`.
 - `commodity` values: `coking_coal | non_coking_coal | iron_ore | limestone`. Frontend normalises display strings via `toLowerCase().replace(/[-\s]/g, '_')`.
 - Full endpoint list lives in the `app/urls.py` module docstring — check there first instead of grepping.

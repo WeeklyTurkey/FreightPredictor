@@ -11,8 +11,15 @@ import {
   mockPortStatus,
   mockVesselClasses,
   mockCargoTypes,
+  mockBdi,
+  mockVlsfo,
   simulateScenario,
 } from './mockData';
+import {
+  validateSelection,
+  buildRatesQuery,
+  emptyShape,
+} from './forecastParams';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA === 'true';
 
@@ -74,47 +81,88 @@ export const getRoutes = async () => {
 };
 
 // --- Historical Rates & Forecast Combined Data ---
-export const getRates = async (routeId, vesselClass = 'Capesize', commodity = 'coking_coal') => {
+// horizonDays: pass 30|60|90 to read only that forecast horizon (matches
+// the backend `horizon_days` filter). Null reads all stored horizons.
+const COMMODITY_FACTORS = {
+  coking_coal: 1.0,
+  non_coking_coal: 0.8,
+  iron_ore: 0.9,
+  limestone: 1.15,
+};
+
+export { normalizeCommodity } from './forecastParams';
+
+// Guarantee one continuous history→forecast transition on the chart's
+// categorical axis: stamp the forecast values onto the LAST historical
+// point instead of emitting a separate duplicate-date bridge point (which
+// Recharts renders as an adjacent tick, leaving a visible gap between the
+// two lines). Idempotent and safe to apply to any combined shape.
+export const ensureTransition = (combined) => {
+  if (!Array.isArray(combined) || combined.length === 0) return combined;
+  combined.sort((a, b) => new Date(a.date) - new Date(b.date));
+  let lastHistIdx = -1;
+  combined.forEach((c, i) => {
+    if (c.rate != null) lastHistIdx = i;
+  });
+  if (lastHistIdx >= 0 && combined[lastHistIdx].forecast == null) {
+    const p = combined[lastHistIdx];
+    p.forecast = p.rate;
+    p.lower_bound = p.rate;
+    p.upper_bound = p.rate;
+  }
+  return combined;
+};
+
+export const getRates = async (routeId, vesselClass = 'Capesize', commodity = 'coking_coal', horizonDays = null) => {
+  // Validate first: an invalid selection returns an explicit empty state,
+  // never another combination's data.
+  const selection = validateSelection({ routeId, vesselClass, commodity });
+  if (!selection.valid) {
+    console.warn(`Invalid forecast selection (${selection.error}); returning empty state.`);
+    return emptyShape({ routeId, vesselClass, commodityKey: normalizeCommodity(commodity) });
+  }
+  const { routeId: validRouteId, numericRouteId, vesselKey, commodityKey } = selection;
+
   if (USE_MOCK) {
-    const forecast = mockForecast[routeId] || mockForecast['default'];
-    const multiplier = vesselClass === 'Capesize' ? 1.0 : vesselClass === 'Panamax' ? 0.85 : 0.72;
-    return Promise.resolve({
-      ...forecast,
-      historical: forecast.historical.map((h) => ({
-        ...h,
-        rate: Math.round(h.rate * multiplier * 100) / 100,
-        base_freight: Math.round(h.base_freight * multiplier * 100) / 100,
-        baf: Math.round(h.baf * multiplier * 100) / 100,
-      })),
-      combined: forecast.combined.map((c) => ({
-        ...c,
-        rate: c.rate ? Math.round(c.rate * multiplier * 100) / 100 : null,
-        base_freight: c.base_freight ? Math.round(c.base_freight * multiplier * 100) / 100 : null,
-        baf: c.baf ? Math.round(c.baf * multiplier * 100) / 100 : null,
-      })),
-    });
+    return Promise.resolve(
+      mockRates(validRouteId, vesselClass, vesselKey, commodityKey)
+    );
   }
 
   try {
-    const numericRouteId = parseInt(routeId, 10) || 1;
-
-    // Dynamically resolve vessel class name → DB ID
+    // Vessel lookup doubles as a backend reachability check: if the
+    // endpoint itself fails, fall back to mock data for the requested
+    // combination. A reachable backend that lacks the vessel (or a
+    // mock-namespace route id it cannot hold) returns an empty state —
+    // never another combination's data.
+    const vesselsRes = await apiClient.get('/vessels/').catch(() => null);
+    if (!vesselsRes) {
+      console.warn('Backend vessels call failed; using mock data for requested selection.');
+      return mockRates(validRouteId, vesselClass, vesselKey, commodityKey);
+    }
     let vesselId;
     if (typeof vesselClass === 'number') {
       vesselId = vesselClass;
     } else {
-      const vesselsRes = await apiClient.get('/vessels/').catch(() => ({ data: [] }));
       const vessels = unwrapDRF(vesselsRes.data);
       const match = vessels.find((v) =>
-        (v.size_class_display || v.size_class || '').toLowerCase() === vesselClass.toLowerCase()
+        (v.size_class_display || v.size_class || '').toLowerCase().replace(/[-\s]/g, '') === vesselKey
       );
-      vesselId = match ? match.id : (vessels[0]?.id || 1);
+      if (!match) {
+        console.warn(
+          `Vessel class "${vesselClass}" not found in /vessels/ response; returning empty state.`
+        );
+        return emptyShape({ routeId: validRouteId, vesselClass, commodityKey });
+      }
+      vesselId = match.id;
     }
-    const commodityKey = commodity.toLowerCase().replace(/[-\s]/g, '_');
+    if (numericRouteId === null) {
+      return emptyShape({ routeId, vesselClass, commodityKey });
+    }
 
     const [rawRates, rawForecasts] = await Promise.all([
-      fetchAllPages('/rates/', { route: numericRouteId, vessel_class: vesselId, commodity: commodityKey }).catch(() => []),
-      fetchAllPages('/forecasts/', { route: numericRouteId, vessel_class: vesselId, commodity: commodityKey }).catch(() => []),
+      fetchAllPages('/rates/', buildRatesQuery({ numericRouteId, vesselId, commodityKey })).catch(() => []),
+      fetchAllPages('/forecasts/', buildRatesQuery({ numericRouteId, vesselId, commodityKey, horizonDays })).catch(() => []),
     ]);
 
     // Transform historical rates
@@ -152,19 +200,6 @@ export const getRates = async (routeId, vesselClass = 'Capesize', commodity = 'c
       upper_bound: null,
     }));
 
-    // Bridge point: last historical value also appears as first forecast value
-    // so the two lines visually connect in the chart
-    const lastHist = historical[historical.length - 1];
-    const bridgePoint = lastHist && forecast.length > 0 ? [{
-      date: lastHist.date,
-      rate: null,
-      base_freight: null,
-      baf: null,
-      forecast: lastHist.rate,
-      lower_bound: lastHist.rate,
-      upper_bound: lastHist.rate,
-    }] : [];
-
     const combinedForecast = forecast.map((f) => ({
       date: f.date,
       rate: null,
@@ -175,11 +210,12 @@ export const getRates = async (routeId, vesselClass = 'Capesize', commodity = 'c
       upper_bound: f.upper_bound,
     }));
 
-    const combined = [...combinedHist, ...bridgePoint, ...combinedForecast];
+    const combined = ensureTransition([...combinedHist, ...combinedForecast]);
 
+    // Backend answered but holds no rows for this combination: explicit
+    // empty state, never another combination's (or mock) data.
     if (combined.length === 0) {
-      const fallback = mockForecast[routeId] || mockForecast['default'];
-      return fallback;
+      return emptyShape({ routeId: validRouteId, vesselClass, commodityKey });
     }
 
     // Compute model confidence from forecast interval tightness
@@ -191,36 +227,79 @@ export const getRates = async (routeId, vesselClass = 'Capesize', commodity = 'c
     }
 
     return {
-      route_id: routeId,
+      route_id: numericRouteId,
       vessel_class: vesselClass,
+      vessel_class_id: vesselId,
+      commodity: commodityKey,
+      isEmpty: false,
       historical,
       forecast,
       combined,
       confidence,
     };
   } catch (err) {
+    // Network/backend failure (not an empty result): mock fallback keeps
+    // the demo usable. Pass the validated selection so the fallback still
+    // reflects the requested vessel and commodity.
     console.warn('Backend rates call failed, using mock data:', err);
-    return mockForecast[routeId] || mockForecast['default'];
+    return mockRates(validRouteId, vesselClass, vesselKey, commodityKey);
   }
+};
+
+// Mock series per requested combination: vessel/commodity scaling plus a
+// deterministic per-commodity variation so selections never share one
+// identical series.
+const mockRates = (routeId, vesselClass, vesselKey, commodityKey) => {
+  const forecast = mockForecast[routeId] || mockForecast['default'];
+  const multiplier = vesselKey === 'capesize' ? 1.0 : vesselKey === 'panamax' ? 0.85 : 0.72;
+  const base = multiplier * (COMMODITY_FACTORS[commodityKey] || 1.0);
+  const jitterFor = (dateStr) => {
+    let h = 2166136261;
+    const s = `${commodityKey}:${dateStr}`;
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return 1 + (((h >>> 0) % 300) - 150) / 10000;
+  };
+  const scaleVal = (v, dateStr) => (v ? Math.round(v * base * jitterFor(dateStr) * 100) / 100 : null);
+  return {
+    ...forecast,
+    route_id: routeId,
+    vessel_class: vesselClass,
+    vessel_class_id: null,
+    commodity: commodityKey,
+    isEmpty: false,
+    historical: forecast.historical.map((h) => ({
+      ...h,
+      rate: scaleVal(h.rate, h.date),
+      base_freight: scaleVal(h.base_freight, h.date),
+      baf: scaleVal(h.baf, h.date),
+    })),
+    // Bounds travel with the forecast through the identical per-date
+    // scale: scaling one without the other splits the band from the line.
+    forecast: (forecast.forecast || []).map((f) => ({
+      ...f,
+      forecast: scaleVal(f.forecast, f.date),
+      predictedRate: scaleVal(f.predictedRate ?? f.forecast, f.date),
+      lower_bound: scaleVal(f.lower_bound, f.date),
+      upper_bound: scaleVal(f.upper_bound, f.date),
+    })),
+    combined: ensureTransition(forecast.combined.map((c) => ({
+      ...c,
+      rate: scaleVal(c.rate, c.date),
+      base_freight: scaleVal(c.base_freight, c.date),
+      baf: scaleVal(c.baf, c.date),
+      forecast: scaleVal(c.forecast, c.date),
+      lower_bound: scaleVal(c.lower_bound, c.date),
+      upper_bound: scaleVal(c.upper_bound, c.date),
+    }))),
+  };
 };
 
 // --- Forecast ---
 export const getForecast = async (routeId) => {
   return getRates(routeId);
-};
-
-// --- Trigger Backend ML Forecast Generation ---
-export const triggerForecastGeneration = async (routeId = 1, vesselClassId = 1, commodity = 'coking_coal', horizonDays = 90) => {
-  if (USE_MOCK) {
-    return Promise.resolve({ status: 'success', message: 'Mock forecast generated.' });
-  }
-  const response = await apiClient.post('/forecasts/generate/', {
-    route_id: parseInt(routeId, 10),
-    vessel_class_id: parseInt(vesselClassId, 10),
-    commodity: commodity.toLowerCase().replace(/ /g, '_'),
-    horizon_days: parseInt(horizonDays, 10),
-  });
-  return response.data;
 };
 
 // --- Recommendations ---
@@ -614,5 +693,91 @@ export const runSimulation = async (volumeMt, laycanWeeks, routeId, charterType)
     };
   } catch (err) {
     return simulateScenario(volumeMt, laycanWeeks, routeId, charterType);
+  }
+};
+
+// --- BDI (live MarketIndex, mock fallback) ---
+export const getBdiLatest = async () => {
+  if (USE_MOCK) return Promise.resolve(mockBdi.latest);
+  try {
+    const response = await apiClient.get('/market-indices/latest/');
+    const items = Array.isArray(response.data) ? response.data : [];
+    const bdi = items.find((i) => i.index_type === 'BDI');
+    if (!bdi) return mockBdi.latest;
+    return {
+      value: parseFloat(bdi.value) || 0,
+      change_pct: parseFloat(bdi.change_pct_24h) || 0,
+      date: bdi.date || '',
+      source: bdi.source || 'synthetic',
+    };
+  } catch (err) {
+    console.warn('Backend BDI latest call failed, using mock BDI:', err);
+    return mockBdi.latest;
+  }
+};
+
+export const getBdiHistory = async (days = 90) => {
+  if (USE_MOCK) return Promise.resolve(mockBdi.history);
+  try {
+    const rows = await fetchAllPages('/market-indices/', { index_type: 'BDI' });
+    const series = rows
+      .map((r) => ({
+        date: r.date,
+        value: parseFloat(r.value) || 0,
+        source: r.source || 'synthetic',
+      }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(-days);
+    return series.length > 0 ? series : mockBdi.history;
+  } catch (err) {
+    console.warn('Backend BDI history call failed, using mock BDI:', err);
+    return mockBdi.history;
+  }
+};
+
+// --- VLSFO (live BunkerFuelPrice, mock fallback) ---
+export const getVlsfoLatest = async () => {
+  if (USE_MOCK) return Promise.resolve(mockVlsfo.latest);
+  try {
+    const response = await apiClient.get('/bunker-fuel-prices/latest/');
+    const data = response.data || {};
+    if (!data.marine_gas_oil_usd) return mockVlsfo.latest;
+    return {
+      value: parseFloat(data.marine_gas_oil_usd) || 0,
+      unit: '$/MT',
+      currency: 'USD',
+      change_pct: null,
+      date: data.date || '',
+      source: data.source || 'synthetic',
+    };
+  } catch (err) {
+    console.warn('Backend VLSFO latest call failed, using mock VLSFO:', err);
+    return mockVlsfo.latest;
+  }
+};
+
+export const getVlsfoHistory = async (days = 90) => {
+  if (USE_MOCK) return Promise.resolve(mockVlsfo.history);
+  try {
+    const rows = await fetchAllPages('/bunker-fuel-prices/');
+    const series = rows
+      .map((r) => ({
+        date: r.date,
+        value: parseFloat(r.marine_gas_oil_usd) || 0,
+        source: r.source || 'synthetic',
+      }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(-days);
+    if (series.length >= 2) {
+      const last = series[series.length - 1];
+      const prev = series[series.length - 2];
+      last.change_pct = prev.value
+        ? Math.round(((last.value - prev.value) / prev.value) * 1000) / 10
+        : null;
+    }
+    return series.length > 0 ? series : mockVlsfo.history;
+  } catch (err) {
+    console.warn('Backend VLSFO history call failed, using mock VLSFO:', err);
+    return mockVlsfo.history;
   }
 };
