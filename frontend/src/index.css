@@ -9,25 +9,18 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
   body {
-    background-color: #f0f4f8;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(170, 39%, 85%, 0.7) 0, transparent 50%), 
-      radial-gradient(at 100% 0%, hsla(250, 40%, 88%, 0.7) 0, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(190, 40%, 85%, 0.7) 0, transparent 50%);
-    background-attachment: fixed;
-    @apply text-slate-800 antialiased min-h-screen;
+    background-color: #f5f5f7;
+    @apply text-slate-900 antialiased min-h-screen;
   }
 }
 
 @layer components {
-  /* Clean card with subtle shadow and glassmorphism */
+  /* Clean card with subtle shadow */
   .card {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 0;
-    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
     transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   }
 
@@ -35,9 +28,9 @@
     transition: all 0.2s ease;
   }
   .card-hover:hover {
-    border-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-    transform: translateY(-2px);
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
   }
 
   .btn-primary {
@@ -82,34 +75,113 @@
   outline: none !important;
 }
 
-/* Glassmorphism Overrides */
-/* The templates have solid backgrounds hardcoded. We override them here to let the glass effect work without touching the components. */
-.bg-\[\#f8f9fb\] {
-  background-color: transparent !important;
+
+
+/* ═══════════════════════════════════════════════════════════
+   Apple-Inspired Navigation Bar — Light Theme
+   ═══════════════════════════════════════════════════════════ */
+
+/* Main navbar bar — white frosted glass */
+.apple-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.card .bg-white {
-  background-color: rgba(255, 255, 255, 0.4) !important;
-  backdrop-filter: blur(8px);
+/* Nav link styling — Apple's compact, dark text on white */
+.apple-nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 44px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: rgba(0, 0, 0, 0.56);
+  transition: color 0.2s ease;
+  cursor: pointer;
+  background: none;
+  border: none;
+  white-space: nowrap;
 }
 
-.card .bg-slate-50 {
-  background-color: rgba(248, 250, 252, 0.4) !important;
-  backdrop-filter: blur(8px);
+.apple-nav-link:hover {
+  color: rgba(0, 0, 0, 0.88);
 }
 
-.card .bg-emerald-50 {
-  background-color: rgba(236, 253, 245, 0.4) !important;
+.apple-nav-link--active {
+  color: rgba(0, 0, 0, 0.88);
+  font-weight: 500;
 }
 
-.card .bg-amber-50 {
-  background-color: rgba(255, 251, 235, 0.4) !important;
+/* Small icon buttons (search, bell, hamburger) */
+.apple-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 44px;
+  color: rgba(0, 0, 0, 0.48);
+  transition: color 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
-.card .bg-teal-50 {
-  background-color: rgba(240, 253, 250, 0.4) !important;
+.apple-nav-icon:hover {
+  color: rgba(0, 0, 0, 0.8);
 }
 
-.card .bg-rose-50 {
-  background-color: rgba(255, 241, 242, 0.4) !important;
+/* Full-width mega dropdown panel — white glass */
+.apple-dropdown {
+  background: rgba(251, 251, 253, 0.97);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  animation: appleDropdownReveal 0.22s ease-out forwards;
+  will-change: opacity, transform;
 }
+
+@keyframes appleDropdownReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade-in for backdrops */
+.animate-fade-in {
+  animation: appleFadeIn 0.15s ease-out forwards;
+}
+
+@keyframes appleFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Mobile menu slide-in */
+.apple-mobile-menu {
+  animation: appleMobileSlide 0.25s ease-out forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes appleMobileSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

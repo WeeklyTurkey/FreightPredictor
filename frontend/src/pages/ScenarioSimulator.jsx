@@ -50,7 +50,7 @@ export default function ScenarioSimulator() {
  <Navbar />
  <div className="flex items-center justify-center h-[60vh]">
  <div className="flex items-center gap-3 text-slate-400">
- <div className="w-6 h-6 border-2 border-teal-500 border-t-transparent -full animate-spin" />
+ <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
  Loading simulator...
  </div>
  </div>
@@ -145,7 +145,7 @@ export default function ScenarioSimulator() {
  <div className="bg-slate-50 p-6 border border-slate-100 flex flex-col justify-center">
  {simLoading ? (
  <div className="flex flex-col items-center justify-center py-12 text-slate-400">
- <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent -full animate-spin mb-4" />
+ <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin mb-4" />
  <p className="font-medium">Running scenario calculations...</p>
  </div>
  ) : simResult ? (

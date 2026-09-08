@@ -99,7 +99,7 @@ export default function RateBreakdown() {
  <Navbar />
  <div className="flex items-center justify-center h-[60vh]">
  <div className="flex items-center gap-3 text-slate-400">
- <div className="w-6 h-6 border-2 border-teal-500 border-t-transparent -full animate-spin" />
+ <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
  Loading rate breakdown...
  </div>
  </div>
@@ -200,7 +200,7 @@ export default function RateBreakdown() {
  >
  {calcLoading ? (
  <>
- <div className="w-4 h-4 border-2 border-white border-t-transparent -full animate-spin" />
+ <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
  Calculating...
  </>
  ) : (

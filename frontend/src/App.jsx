@@ -8,6 +8,7 @@ import RateBreakdown from './pages/RateBreakdown';
 import TopRecommendations from './pages/TopRecommendations';
 import ScenarioSimulator from './pages/ScenarioSimulator';
 import Charterers from './pages/Charterers';
+import GraphDetails from './pages/GraphDetails';
 
 function App() {
  return (
@@ -22,6 +23,7 @@ function App() {
  {/* Rate Trends Pages */}
  <Route path="/rates/forecast" element={<RateForecast />} />
  <Route path="/rates/breakdown" element={<RateBreakdown />} />
+ <Route path="/rates/graph" element={<GraphDetails />} />
 
  {/* Recommendations Pages */}
  <Route path="/recommendations/picks" element={<TopRecommendations />} />

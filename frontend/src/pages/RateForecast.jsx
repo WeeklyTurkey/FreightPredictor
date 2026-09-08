@@ -114,7 +114,7 @@ export default function RateForecast() {
  >
  {generating ? (
  <>
- <div className="w-4 h-4 border-2 border-white border-t-transparent -full animate-spin" />
+ <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
  Running Prophet ML...
  </>
  ) : (
