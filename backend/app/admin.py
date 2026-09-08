@@ -8,6 +8,7 @@ from django.contrib import admin
 from app.models import (
     Port, Vessel, Route, FreightRateHistory, Forecast,
     Charterer, MarketIndex, MacroFactor, CostBreakdown, Recommendation,
+    WeatherData,
 )
 
 
@@ -83,3 +84,10 @@ class RecommendationAdmin(admin.ModelAdmin):
     list_display = ['route', 'vessel_class', 'commodity', 'signal', 'generated_at']
     list_filter = ['signal', 'commodity']
     readonly_fields = ['signal', 'rationale', 'financial_impact_usd', 'financial_impact_inr']
+
+
+@admin.register(WeatherData)
+class WeatherDataAdmin(admin.ModelAdmin):
+    list_display = ['port', 'date', 'wind_speed_ms', 'wave_height_m', 'rainfall_mm', 'storm_severity', 'weather_impact_score']
+    list_filter = ['port__name', 'storm_severity']
+    date_hierarchy = 'date'

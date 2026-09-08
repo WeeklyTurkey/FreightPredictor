@@ -4,6 +4,8 @@ SIH26006 Freight Forecasting Platform — All API Endpoints
 Base URL: /api/v1/
 
 Endpoints:
+  GET    /weather/                        — List per-port weather observations
+  GET    /weather/<id>/                   — Weather detail
   GET    /ports/                          — List all ports
   GET    /ports/<id>/                     — Port detail
   GET    /vessels/                        — List vessel classes
@@ -36,7 +38,7 @@ from app.views import (
     PortViewSet, VesselViewSet, RouteViewSet,
     FreightRateHistoryViewSet, ForecastViewSet,
     ChartererViewSet, MarketIndexViewSet, MacroFactorViewSet,
-    BunkerFuelPriceViewSet,
+    BunkerFuelPriceViewSet, WeatherDataViewSet,
     GenerateForecastView, CalculateCostView,
     GenerateRecommendationView, PortFeasibilityView,
     PortTrafficView, DashboardSummaryView,
@@ -52,6 +54,7 @@ router.register(r'charterers', ChartererViewSet, basename='charterer')
 router.register(r'market-indices', MarketIndexViewSet, basename='market-index')
 router.register(r'macro-factors', MacroFactorViewSet, basename='macro-factor')
 router.register(r'bunker-fuel-prices', BunkerFuelPriceViewSet, basename='bunker-fuel-price')
+router.register(r'weather', WeatherDataViewSet, basename='weather')
 
 urlpatterns = [
     # Action endpoints (POST)

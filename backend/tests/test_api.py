@@ -14,7 +14,7 @@ from rest_framework import status
 
 from app.models import (
     Port, Vessel, Route, FreightRateHistory, Forecast,
-    Charterer, MarketIndex, MacroFactor,
+    Charterer, MarketIndex, MacroFactor, WeatherData,
 )
 from app.trust_score import compute_trust_score, compute_all_trust_scores
 
@@ -258,3 +258,272 @@ class PortTrafficAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['ships_currently_at_port'], 12)
+
+
+# ===========================================================================
+# Weather & Regressor-Based Forecasting Tests
+# ===========================================================================
+
+
+class FakePrediction:
+    """Minimal stand-in for Prophet's prediction DataFrame (iterrows only)."""
+
+    def __init__(self, n):
+        self.n = n
+
+    def iterrows(self):
+        for i in range(self.n):
+            yield i, {'yhat': 20.0 + i * 0.1, 'yhat_lower': 19.0, 'yhat_upper': 21.0}
+
+
+class FakeProphet:
+    """Lightweight Prophet double: records regressors, skips the real fit."""
+
+    instances = []
+
+    def __init__(self, *args, **kwargs):
+        self.regressors = []
+        FakeProphet.instances.append(self)
+
+    def add_regressor(self, name):
+        self.regressors.append(name)
+
+    def fit(self, df):
+        self.fit_df = df
+
+    def predict(self, future):
+        return FakePrediction(len(future))
+
+
+def make_route_with_history(days=15, start=None):
+    """Create origin/dest ports, route, vessel and `days` of rate history."""
+    from datetime import date, timedelta
+    start = start or date(2026, 1, 5)
+    origin = Port.objects.create(
+        name="Newcastle", country="Australia", port_type="origin",
+    )
+    dest = Port.objects.create(
+        name="Haldia", country="India", port_type="destination",
+    )
+    route = Route.objects.create(
+        origin_port=origin, destination_port=dest,
+        distance_nautical_miles=6800, typical_transit_days=19,
+    )
+    vessel = Vessel.objects.create(
+        size_class="capesize",
+        min_dwt=100000, max_dwt=200000,
+        typical_draft=17.0, typical_beam=46.0, typical_loa=290.0,
+    )
+    for i in range(days):
+        FreightRateHistory.objects.create(
+            route=route, vessel_class=vessel, commodity='coking_coal',
+            date=start + timedelta(days=i),
+            rate_usd_per_ton=Decimal(20 + i * 0.1),
+        )
+    return route, vessel, start
+
+
+def seed_regressors(dest, start, history_days=15, weather_days=30):
+    """Create BDI, MacroFactor and future WeatherData aligned to history."""
+    from datetime import timedelta
+    for i in range(history_days):
+        day = start + timedelta(days=i)
+        MarketIndex.objects.create(
+            index_type='BDI', date=day, value=1500 + i, change_pct_24h=0.5,
+        )
+        MacroFactor.objects.create(
+            date=day, bunker_fuel_price_usd=500 + i,
+            port_congestion_index=50, seasonal_weather_impact=4.0,
+        )
+    for i in range(weather_days):
+        day = start + timedelta(days=history_days + i)
+        WeatherData.objects.create(
+            port=dest, date=day, wind_speed_ms=8.0, wave_height_m=2.0,
+            rainfall_mm=5.0, storm_severity=0, weather_impact_score=4.5,
+        )
+
+
+class WeatherDataModelTest(TestCase):
+    def setUp(self):
+        self.dest = Port.objects.create(
+            name="Haldia", country="India", port_type="destination",
+        )
+
+    def test_create_weather_with_port_relationship(self):
+        from datetime import date
+        row = WeatherData.objects.create(
+            port=self.dest, date=date(2026, 9, 9), wind_speed_ms=8.5,
+            wave_height_m=2.1, rainfall_mm=4.0, storm_severity=1,
+            weather_impact_score=4.2,
+        )
+        self.assertEqual(row.port.name, "Haldia")
+        self.assertIn("Haldia", str(row))
+        self.assertEqual(
+            WeatherData.objects.filter(port=self.dest).count(), 1
+        )
+
+    def test_unique_port_date(self):
+        from datetime import date
+        kwargs = dict(
+            port=self.dest, date=date(2026, 9, 9), wind_speed_ms=8.5,
+            wave_height_m=2.1, rainfall_mm=0.0, storm_severity=0,
+            weather_impact_score=3.0,
+        )
+        WeatherData.objects.create(**kwargs)
+        with self.assertRaises(Exception):
+            WeatherData.objects.create(**kwargs)
+
+
+class SeedWeatherCommandTest(TestCase):
+    def setUp(self):
+        for name in ("Haldia", "Paradip"):
+            Port.objects.create(
+                name=name, country="India", port_type="destination",
+            )
+
+    def test_generates_next_30_days(self):
+        from datetime import date, timedelta
+        from django.core.management import call_command
+        call_command('seed_weather')
+        today = date.today()
+        self.assertEqual(WeatherData.objects.count(), 2 * 30)
+        dates = sorted(
+            WeatherData.objects.values_list('date', flat=True).distinct()
+        )
+        self.assertEqual(dates[0], today)
+        self.assertEqual(dates[-1], today + timedelta(days=29))
+
+    def test_idempotent_and_deterministic(self):
+        from django.core.management import call_command
+        from app.management.commands.seed_weather import generate_weather_values
+        from datetime import date
+        call_command('seed_weather')
+        first = list(
+            WeatherData.objects.order_by('port_id', 'date').values_list(
+                'wind_speed_ms', 'weather_impact_score'
+            )
+        )
+        call_command('seed_weather')
+        self.assertEqual(WeatherData.objects.count(), 2 * 30)
+        second = list(
+            WeatherData.objects.order_by('port_id', 'date').values_list(
+                'wind_speed_ms', 'weather_impact_score'
+            )
+        )
+        self.assertEqual(first, second)
+        port = Port.objects.get(name="Haldia")
+        self.assertEqual(
+            generate_weather_values(port.id, date.today()),
+            generate_weather_values(port.id, date.today()),
+        )
+
+
+class ForecastRegressorTest(TestCase):
+    def setUp(self):
+        FakeProphet.instances = []
+        self.route, self.vessel, self.start = make_route_with_history(days=15)
+        seed_regressors(self.route.destination_port, self.start)
+
+    def test_regressors_added_to_prophet(self):
+        from unittest import mock
+        from app import forecasting
+        with mock.patch('prophet.Prophet', FakeProphet):
+            results = forecasting.generate_forecast(
+                self.route.id, self.vessel.id, 'coking_coal', horizon_days=30,
+            )
+        self.assertEqual(len(results), 30)
+        self.assertEqual(
+            FakeProphet.instances[-1].regressors,
+            ['bdi', 'bunker', 'congestion', 'weather_score'],
+        )
+        self.assertEqual(results[0]['horizon_days'], 30)
+
+    def test_missing_regressors_fall_back(self):
+        """No BDI/Macro rows → plain Prophet path is used instead."""
+        from unittest import mock
+        from app import forecasting
+        MarketIndex.objects.all().delete()
+        MacroFactor.objects.all().delete()
+        with mock.patch.object(
+            forecasting, '_prophet_forecast',
+            return_value=[{'forecast_date': self.start, 'predicted_rate': 1}],
+        ) as plain:
+            results = forecasting.generate_forecast(
+                self.route.id, self.vessel.id, 'coking_coal',
+            )
+        plain.assert_called_once()
+        self.assertEqual(results[0]['predicted_rate'], 1)
+
+    def test_insufficient_history_flat_placeholder(self):
+        """Fewer than 10 history rows keeps the $15 placeholder behavior."""
+        from datetime import timedelta
+        from app import forecasting
+        FreightRateHistory.objects.all().delete()
+        for i in range(5):
+            FreightRateHistory.objects.create(
+                route=self.route, vessel_class=self.vessel,
+                commodity='coking_coal',
+                date=self.start + timedelta(days=i),
+                rate_usd_per_ton=Decimal(20 + i * 0.1),
+            )
+        results = forecasting.generate_forecast(
+            self.route.id, self.vessel.id, 'coking_coal', horizon_days=30,
+        )
+        self.assertEqual(len(results), 30)
+        self.assertTrue(
+            all(r['predicted_rate'] == Decimal('15.00') for r in results)
+        )
+
+
+class ForecastGenerateAPITest(APITestCase):
+    def test_generate_endpoint_uses_forecasting(self):
+        from unittest import mock
+        route, vessel, start = make_route_with_history(days=15)
+        seed_regressors(route.destination_port, start)
+        with mock.patch('prophet.Prophet', FakeProphet):
+            response = self.client.post('/api/v1/forecasts/generate/', {
+                'route_id': route.id,
+                'vessel_class_id': vessel.id,
+                'commodity': 'coking_coal',
+                'horizon_days': 30,
+            })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['count'], 30)
+        self.assertEqual(
+            Forecast.objects.filter(
+                route=route, vessel_class=vessel, horizon_days=30,
+            ).count(), 30,
+        )
+
+
+class WeatherAPITest(APITestCase):
+    def setUp(self):
+        from datetime import date
+        self.dest = Port.objects.create(
+            name="Haldia", country="India", port_type="destination",
+        )
+        WeatherData.objects.create(
+            port=self.dest, date=date(2026, 9, 9), wind_speed_ms=8.5,
+            wave_height_m=2.1, rainfall_mm=4.0, storm_severity=1,
+            weather_impact_score=4.2,
+        )
+
+    def test_list_weather(self):
+        response = self.client.get('/api/v1/weather/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_filter_weather_by_port(self):
+        response = self.client.get(f'/api/v1/weather/?port={self.dest.id}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['port_name'], 'Haldia')
+
+
+class MigrationConsistencyTest(TestCase):
+    def test_no_missing_migrations(self):
+        import io
+        from django.core.management import call_command
+        call_command(
+            'makemigrations', 'app', '--check', '--dry-run',
+            stdout=io.StringIO(),
+        )

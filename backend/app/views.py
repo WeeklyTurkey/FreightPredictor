@@ -24,14 +24,14 @@ from rest_framework.views import APIView
 from app.models import (
     Port, Vessel, Route, FreightRateHistory, Forecast,
     Charterer, MarketIndex, MacroFactor, CostBreakdown, Recommendation,
-    BunkerFuelPrice,
+    BunkerFuelPrice, WeatherData,
 )
 from app.serializers import (
     PortSerializer, VesselSerializer, RouteSerializer, RouteListSerializer,
     FreightRateHistorySerializer, ForecastSerializer,
     ChartererSerializer, ChartererListSerializer,
     MarketIndexSerializer, MacroFactorSerializer,
-    BunkerFuelPriceSerializer,
+    BunkerFuelPriceSerializer, WeatherDataSerializer,
     CostBreakdownSerializer, CostBreakdownRequestSerializer,
     RecommendationSerializer, RecommendationRequestSerializer,
     ForecastRequestSerializer,
@@ -386,6 +386,32 @@ class BunkerFuelPriceViewSet(viewsets.ReadOnlyModelViewSet):
         qs = super().get_queryset()
         date_from = self.request.query_params.get('date_from')
         date_to = self.request.query_params.get('date_to')
+        if date_from:
+            qs = qs.filter(date__gte=date_from)
+        if date_to:
+            qs = qs.filter(date__lte=date_to)
+        return qs
+
+
+class WeatherDataViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Daily synthetic weather observations per destination port.
+    Future regressor values for the forecasting engine.
+    Supports filtering by:
+      ?port=<id>
+      ?date_from=YYYY-MM-DD
+      ?date_to=YYYY-MM-DD
+    """
+    queryset = WeatherData.objects.select_related('port').all()
+    serializer_class = WeatherDataSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        port = self.request.query_params.get('port')
+        date_from = self.request.query_params.get('date_from')
+        date_to = self.request.query_params.get('date_to')
+        if port:
+            qs = qs.filter(port_id=port)
         if date_from:
             qs = qs.filter(date__gte=date_from)
         if date_to:

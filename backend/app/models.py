@@ -13,6 +13,7 @@ Contains every model for the platform in a single file:
 - PortTraffic (ships at port & expected incoming shipments)
 - CostBreakdown (itemised landed-cost calculations)
 - Recommendation (buy/wait/delay decision records)
+- WeatherData (daily synthetic per-port weather for forecast regressors)
 """
 
 from django.db import models
@@ -427,3 +428,49 @@ class BunkerFuelPrice(models.Model):
 
     def __str__(self):
         return f"Bunker Fuel {self.date}: ${self.marine_gas_oil_usd}"
+
+
+class WeatherData(models.Model):
+    """
+    Daily synthetic weather observations per destination port.
+
+    Covers the forecast horizon (next 30 days from generation time) so the
+    Prophet engine in forecasting.py can use weather as external regressors
+    for future dates. Historical training rows use MacroFactor's
+    seasonal_weather_impact on the same 0–10 scale instead.
+    """
+
+    port = models.ForeignKey(
+        Port,
+        on_delete=models.CASCADE,
+        related_name='weather_data',
+        limit_choices_to={'port_type': 'destination'},
+        help_text="Destination port this observation applies to",
+    )
+    date = models.DateField(help_text="Observation date")
+    wind_speed_ms = models.FloatField(
+        help_text="Mean wind speed in metres per second",
+    )
+    wave_height_m = models.FloatField(
+        help_text="Significant wave height in metres",
+    )
+    rainfall_mm = models.FloatField(
+        help_text="Total rainfall in millimetres",
+    )
+    storm_severity = models.PositiveIntegerField(
+        default=0,
+        help_text="Storm/severity indicator on a 0–5 scale (0 = calm)",
+    )
+    weather_impact_score = models.FloatField(
+        help_text="Composite weather impact on freight operations, 0–10 scale",
+    )
+
+    class Meta:
+        ordering = ['date']
+        unique_together = ['port', 'date']
+        indexes = [
+            models.Index(fields=['port', 'date']),
+        ]
+
+    def __str__(self):
+        return f"Weather {self.port.name} {self.date}: score {self.weather_impact_score}"

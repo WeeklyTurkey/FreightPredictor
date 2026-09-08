@@ -217,7 +217,7 @@ export const triggerForecastGeneration = async (routeId = 1, vesselClassId = 1, 
   const response = await apiClient.post('/forecasts/generate/', {
     route_id: parseInt(routeId, 10),
     vessel_class_id: parseInt(vesselClassId, 10),
-    commodity: commodity.toLowerCase().replace(/[-\s]/g, '_'),
+    commodity: commodity.toLowerCase().replace(/ /g, '_'),
     horizon_days: parseInt(horizonDays, 10),
   });
   return response.data;
