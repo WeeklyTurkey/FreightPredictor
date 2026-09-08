@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
  Users,
  Search,
- Shield,
  Clock,
  AlertTriangle,
  TrendingUp,
@@ -12,11 +11,10 @@ import {
  ChevronUp,
  Building2,
  Award,
- RefreshCw,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import TrustBadge from '../components/TrustBadge';
-import { getCharterers, recalculateTrustScores } from '../api/freightService';
+import { getCharterers } from '../api/freightService';
 
 export default function Charterers() {
  const [charterers, setCharterers] = useState([]);
@@ -26,15 +24,22 @@ export default function Charterers() {
  const [sortDir, setSortDir] = useState('desc');
  const [expandedId, setExpandedId] = useState(null);
  const [loading, setLoading] = useState(true);
- const [recalculating, setRecalculating] = useState(false);
- const [recalcMsg, setRecalcMsg] = useState('');
+ const [loadError, setLoadError] = useState('');
  const [riskFilter, setRiskFilter] = useState('all');
+ const [updatedAt, setUpdatedAt] = useState(null);
 
  const fetchCharterers = () => {
  setLoading(true);
- getCharterers().then((data) => {
- setCharterers(data);
- setFiltered(data);
+ setLoadError('');
+ getCharterers()
+ .then((data) => {
+ setCharterers(Array.isArray(data) ? data : []);
+ setUpdatedAt(new Date());
+ setLoading(false);
+ })
+ .catch((err) => {
+ setCharterers([]);
+ setLoadError(err?.message || 'Failed to load the charterer directory.');
  setLoading(false);
  });
  };
@@ -42,20 +47,6 @@ export default function Charterers() {
  useEffect(() => {
  fetchCharterers();
  }, []);
-
- const handleRecalculate = async () => {
- setRecalculating(true);
- setRecalcMsg('');
- try {
- const res = await recalculateTrustScores();
- setRecalcMsg(res.message || 'Recalculated trust scores!');
- fetchCharterers();
- } catch (err) {
- setRecalcMsg('Recalculated scores.');
- } finally {
- setRecalculating(false);
- }
- };
 
  useEffect(() => {
  let result = charterers.filter((c) =>
@@ -66,6 +57,7 @@ export default function Charterers() {
  if (riskFilter !== 'all') {
  result = result.filter((c) => c.default_risk === riskFilter);
  }
+
  result.sort((a, b) => {
  const aVal = a[sortBy];
  const bVal = b[sortBy];
@@ -76,6 +68,42 @@ export default function Charterers() {
  });
  setFiltered(result);
  }, [search, charterers, sortBy, sortDir, riskFilter]);
+
+ // Procurement metrics computed from actual response fields. Averages skip
+ // records missing the input; counts and totals treat missing as zero.
+ const numValues = charterers
+ .map((c) => c.on_time_delivery_pct ?? c.on_time_delivery_rate ?? null)
+ .filter((v) => v != null);
+ const payValues = charterers
+ .map((c) => c.payment_reliability_pct ?? null)
+ .filter((v) => v != null);
+ const avg = (vals) => vals.length > 0
+ ? (vals.reduce((s, v) => s + Number(v), 0) / vals.length).toFixed(1)
+ : '—';
+ const totalVoyages = charterers.reduce((s, c) => s + (Number(c.total_voyages) || 0), 0);
+
+ // Score-factor breakdown mirroring backend/app/trust_score.py weights.
+ // Component scores come from the record's own raw inputs; the official
+ // trust score from the backend remains authoritative.
+ const scoreFactors = (c) => {
+ const inputs = {
+ onTime: c.on_time_delivery_pct ?? c.on_time_delivery_rate ?? null,
+ payment: c.payment_reliability_pct ?? null,
+ damage: c.cargo_damage_incidents ?? null,
+ years: c.years_in_operation ?? null,
+ voyages: c.total_voyages ?? null,
+ };
+ if (Object.values(inputs).some((v) => v == null)) return null;
+ const damageMap = { 0: 100, 1: 90, 2: 75, 3: 60, 4: 40 };
+ const damageScore = damageMap[inputs.damage] ?? Math.max(20, 100 - inputs.damage * 15);
+ return [
+ { label: 'On-time delivery', weight: 0.35, score: Math.round(inputs.onTime * 10) / 10 },
+ { label: 'Payment reliability', weight: 0.25, score: Math.round(inputs.payment * 10) / 10 },
+ { label: 'Cargo handling', weight: 0.20, score: damageScore },
+ { label: 'Experience', weight: 0.10, score: Math.round(Math.min((inputs.years / 20) * 100, 100) * 10) / 10 },
+ { label: 'Volume', weight: 0.10, score: Math.round(Math.min((inputs.voyages / 500) * 100, 100) * 10) / 10 },
+ ];
+ };
 
  const handleSort = (field) => {
  if (sortBy === field) {
@@ -98,11 +126,7 @@ export default function Charterers() {
  return 'text-rose-700 bg-rose-50 border-rose-200';
  };
 
- const avgTrust = charterers.length > 0
- ? Math.round(charterers.reduce((sum, c) => sum + c.trust_score, 0) / charterers.length)
- : 0;
- const totalVolume = charterers.reduce((sum, c) => sum + c.total_volume_mt, 0);
- const highRiskCount = charterers.filter((c) => c.default_risk.includes('High')).length;
+
 
  if (loading) {
  return (
@@ -118,6 +142,27 @@ export default function Charterers() {
  );
  }
 
+ if (loadError) {
+ return (
+ <div className="min-h-screen bg-[#f8f9fb]">
+ <Navbar />
+ <main className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6">
+ <div className="card p-10 text-center">
+ <AlertTriangle className="w-8 h-8 text-rose-400 mx-auto mb-3" />
+ <p className="font-medium text-slate-800 mb-1">Could not load the charterer directory</p>
+ <p className="text-sm text-slate-400 mb-4">{loadError}</p>
+ <button
+ onClick={fetchCharterers}
+ className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 font-medium text-sm shadow-sm transition-all"
+ >
+ Retry
+ </button>
+ </div>
+ </main>
+ </div>
+ );
+ }
+
  return (
  <div className="min-h-screen bg-[#f8f9fb]">
  <Navbar />
@@ -129,27 +174,39 @@ export default function Charterers() {
  <p className="text-sm text-slate-400 mt-1">Vetted charterer reliability scoring with performance breakdown and default risk metrics</p>
  </div>
  <div className="flex items-center gap-3">
- {recalcMsg && <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 border border-emerald-200">{recalcMsg}</span>}
- <button
- onClick={handleRecalculate}
- disabled={recalculating}
- className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 font-medium text-sm shadow-sm transition-all flex items-center gap-2"
- >
- <RefreshCw className={`w-4 h-4 ${recalculating ? 'animate-spin' : ''}`} />
- Recalculate Trust Scores
- </button>
+ {updatedAt && (
+ <span className="text-xs text-slate-400">Updated {updatedAt.toLocaleTimeString()}</span>
+ )}
  </div>
  </div>
 
- {/* Summary Stats */}
- <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+ {/* Procurement Stats */}
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
  <div className="card p-4 flex items-center gap-4">
  <div className="p-3 bg-teal-50 border border-teal-100">
- <Shield className="w-5 h-5 text-teal-600" />
+ <Users className="w-5 h-5 text-teal-600" />
  </div>
  <div>
- <p className="text-xs text-slate-400 uppercase tracking-wider">Avg Trust Score</p>
- <p className="text-2xl font-bold text-slate-900 font-mono">{avgTrust}<span className="text-sm text-slate-400">/100</span></p>
+ <p className="text-xs text-slate-400 uppercase tracking-wider">Charterers Available</p>
+ <p className="text-2xl font-bold text-slate-900 font-mono">{charterers.length}</p>
+ </div>
+ </div>
+ <div className="card p-4 flex items-center gap-4">
+ <div className="p-3 bg-emerald-50 border border-emerald-100">
+ <Clock className="w-5 h-5 text-emerald-600" />
+ </div>
+ <div>
+ <p className="text-xs text-slate-400 uppercase tracking-wider">Avg On-Time Delivery</p>
+ <p className="text-2xl font-bold text-slate-900 font-mono">{avg(numValues)}<span className="text-sm text-slate-400">%</span></p>
+ </div>
+ </div>
+ <div className="card p-4 flex items-center gap-4">
+ <div className="p-3 bg-teal-50 border border-teal-100">
+ <CreditCard className="w-5 h-5 text-teal-600" />
+ </div>
+ <div>
+ <p className="text-xs text-slate-400 uppercase tracking-wider">Avg Payment Reliability</p>
+ <p className="text-2xl font-bold text-slate-900 font-mono">{avg(payValues)}<span className="text-sm text-slate-400">%</span></p>
  </div>
  </div>
  <div className="card p-4 flex items-center gap-4">
@@ -157,25 +214,15 @@ export default function Charterers() {
  <TrendingUp className="w-5 h-5 text-emerald-600" />
  </div>
  <div>
- <p className="text-xs text-slate-400 uppercase tracking-wider">Total Volume Managed</p>
- <p className="text-2xl font-bold text-slate-900 font-mono">{(totalVolume / 1e6).toFixed(1)}M MT</p>
- </div>
- </div>
- <div className="card p-4 flex items-center gap-4">
- <div className="p-3 bg-rose-50 border border-rose-100">
- <AlertTriangle className="w-5 h-5 text-rose-500" />
- </div>
- <div>
- <p className="text-xs text-slate-400 uppercase tracking-wider">High-Risk Charterers</p>
- <p className="text-2xl font-bold text-slate-900 font-mono">{highRiskCount}</p>
+ <p className="text-xs text-slate-400 uppercase tracking-wider">Completed Voyages</p>
+ <p className="text-2xl font-bold text-slate-900 font-mono">{totalVoyages.toLocaleString()}</p>
  </div>
  </div>
  </div>
 
  {/* Search & Filter */}
  <div className="card p-4 mb-6">
- <div className="flex flex-col md:flex-row gap-3">
- <div className="flex-1 relative">
+ <div className="relative mb-3">
  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
  <input
  type="text"
@@ -185,7 +232,9 @@ export default function Charterers() {
  className="w-full input-field text-sm pl-10"
  />
  </div>
- <div className="flex gap-2 flex-wrap">
+ <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+ <div className="flex gap-2 flex-wrap items-center">
+ <span className="text-xs text-slate-400 font-medium mr-1">Risk:</span>
  {['all', 'Low', 'Low-Medium', 'Medium', 'Medium-High', 'High'].map((risk) => (
  <button
  key={risk}
@@ -200,6 +249,9 @@ export default function Charterers() {
  </button>
  ))}
  </div>
+ <p className="text-xs text-slate-400 sm:ml-auto whitespace-nowrap">
+ Showing {filtered.length} of {charterers.length} charterers
+ </p>
  </div>
  </div>
 
@@ -248,7 +300,16 @@ export default function Charterers() {
  <React.Fragment key={charterer.id}>
  <tr
  onClick={() => setExpandedId(expandedId === charterer.id ? null : charterer.id)}
- className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
+ onKeyDown={(e) => {
+ if (e.key === 'Enter' || e.key === ' ') {
+ e.preventDefault();
+ setExpandedId(expandedId === charterer.id ? null : charterer.id);
+ }
+ }}
+ tabIndex={0}
+ aria-expanded={expandedId === charterer.id}
+ aria-label={`${charterer.name}: toggle details`}
+ className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-teal-500"
  >
  <td className="py-3 px-4">
  <div className="flex items-center gap-2">
@@ -359,6 +420,43 @@ export default function Charterers() {
  </div>
 
  <div className="mt-4 p-3 bg-white border border-slate-200">
+ <div className="flex items-center justify-between mb-2">
+ <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Trust-Score Breakdown</p>
+ </div>
+ {(() => {
+ const factors = scoreFactors(charterer);
+ if (!factors) {
+ return (
+ <p className="text-xs text-slate-400">
+ Factor inputs unavailable for this record — showing the official score only.
+ </p>
+ );
+ }
+ return (
+ <div className="space-y-2">
+ {factors.map((f) => (
+ <div key={f.label}>
+ <div className="flex justify-between text-xs mb-1">
+ <span className="text-slate-600">{f.label} <span className="text-slate-400">({Math.round(f.weight * 100)}%)</span></span>
+ <span className="font-mono font-medium text-slate-800">{f.score} → +{(f.score * f.weight).toFixed(1)}</span>
+ </div>
+ <div className="h-1.5 bg-slate-100 -full overflow-hidden">
+ <div
+ className={`h-full -full ${f.score >= 85 ? 'bg-emerald-400' : f.score >= 70 ? 'bg-amber-400' : 'bg-rose-400'}`}
+ style={{ width: `${Math.min(f.score, 100)}%` }}
+ />
+ </div>
+ </div>
+ ))}
+ <p className="text-xs text-slate-400 pt-1">
+ Official score <span className="font-mono font-medium text-slate-700">{charterer.trust_score}</span> is computed by the backend scoring model.
+ </p>
+ </div>
+ );
+ })()}
+ </div>
+
+ <div className="mt-4 p-3 bg-white border border-slate-200">
  <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Analyst Notes</p>
  <p className="text-sm text-slate-600">{charterer.notes}</p>
  </div>
@@ -375,6 +473,14 @@ export default function Charterers() {
  No charterers found matching your filters.
  </div>
  )}
+ </div>
+
+ {/* Scoring model reference */}
+ <div className="card p-4 mt-6">
+ <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">How trust scoring works</p>
+ <p className="text-xs text-slate-600 leading-relaxed">
+ Each trust score is a weighted composite (0–100) of vetting inputs: on-time delivery 35% · payment reliability 25% · cargo handling 20% · experience 10% · volume 10%. Expand a charterer row to see its factor breakdown.
+ </p>
  </div>
  </main>
  </div>

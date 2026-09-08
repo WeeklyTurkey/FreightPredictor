@@ -168,7 +168,7 @@ export default function RecommendationCard({ recommendation, compact = false }) 
       )}
 
       <Link
-        to={`/recommendations/simulator?route=${recommendation.route_id}`}
+        to="/recommendations/picks"
         className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-medium text-slate-900 hover:text-white bg-slate-50 hover:bg-slate-900 transition-colors rounded-md"
       >
         View Full Analysis

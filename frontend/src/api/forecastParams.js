@@ -18,6 +18,21 @@ export const normalizeCommodity = (commodity) =>
 export const normalizeVessel = (vesselClass) =>
   (vesselClass || '').toLowerCase().replace(/[-\s]/g, '');
 
+const COMMODITY_DISPLAY = {
+  coking_coal: 'Coking Coal',
+  non_coking_coal: 'Non-Coking Coal',
+  iron_ore: 'Iron Ore',
+  limestone: 'Limestone',
+};
+
+// Backend commodity key → selector display name. Unknown keys pass through
+// unchanged (never silently substituted).
+export const displayCommodity = (commodityKey) =>
+  COMMODITY_DISPLAY[normalizeCommodity(commodityKey)] || String(commodityKey || '');
+
+// Deep link from an Overview route card to its forecast graph.
+export const forecastUrlForRoute = (routeId) => `/rates/forecast?route=${routeId}`;
+
 // Validate a UI selection. Returns normalized values or an explicit error —
 // never a silently substituted default.
 //
@@ -89,4 +104,29 @@ export const matchesSelection = (data, { routeId, vesselClass, commodity }) => {
     return false;
   }
   return true;
+};
+
+// Day counts behind each chart range button. Unknown keys fall back to the
+// full two-year window rather than silently showing nothing.
+export const RANGE_DAYS = { '6m': 180, '1y': 365, '2y': 730 };
+export const DEFAULT_RANGE = '2y';
+
+// Pure date-range slice for the forecast chart. Anchors the window at the
+// latest historical date (never "today", so seeded backfills behave), keeps
+// every in-window history point plus the FULL forecast tail, and therefore
+// preserves the historical→forecast transition point in every range.
+// Returns { historical, combined } with the same row identities.
+export const filterForecastByRange = (historical, combined, dateRange) => {
+  const hist = Array.isArray(historical) ? historical : [];
+  const comb = Array.isArray(combined) ? combined : [];
+  const days = RANGE_DAYS[dateRange] ?? RANGE_DAYS[DEFAULT_RANGE];
+  if (hist.length === 0) return { historical: [], combined: [] };
+  // Explicit chronological sort (never lexicographic string sort, which
+  // breaks on non-zero-padded or non-ISO date inputs).
+  const ascending = [...hist].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const cutoff = new Date(ascending[ascending.length - 1].date).getTime() - days * 86400000;
+  const histSlice = hist.filter((h) => new Date(h.date).getTime() >= cutoff);
+  const histDates = new Set(histSlice.map((h) => h.date));
+  const combinedSlice = comb.filter((c) => histDates.has(c.date) || c.forecast != null);
+  return { historical: histSlice, combined: combinedSlice };
 };

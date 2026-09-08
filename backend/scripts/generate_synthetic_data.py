@@ -3,7 +3,7 @@
 SIH26006 — Synthetic Data Generator
 
 Standalone script that generates realistic-looking JSON datasets for:
-1. freight_rates.json   — 12 months of daily freight rate history
+1. freight_rates.json   — 24 months of daily freight rate history
 2. vessels.json         — 3 vessel classes with physical specs
 3. charterers.json      — 15 synthetic charterer companies with performance metrics
 4. market_indices.json  — BDI/BCI/BPI/BSI daily values
@@ -122,7 +122,7 @@ CHARTERER_NAMES = [
 # ---------------------------------------------------------------------------
 
 def generate_freight_rates():
-    """Generate 12 months of daily freight rate history for all route+vessel+commodity combos.
+    """Generate 24 months of daily freight rate history for all route+vessel+commodity combos.
 
     Uses a momentum-based random walk with:
       - Gradual multi-week trends (mean-reverting momentum)
@@ -133,7 +133,7 @@ def generate_freight_rates():
     import math
     random.seed(42)
     today = date.today()
-    start_date = today - timedelta(days=365)
+    start_date = today - timedelta(days=730)
 
     rates = []
     routes = []
@@ -238,10 +238,10 @@ def generate_charterers():
 
 
 def generate_market_indices():
-    """Generate daily BDI/BCI/BPI/BSI values for the past 12 months."""
+    """Generate daily BDI/BCI/BPI/BSI values for the past 24 months."""
     random.seed(77)
     today = date.today()
-    start_date = today - timedelta(days=365)
+    start_date = today - timedelta(days=730)
 
     indices = []
     base_values = {'BDI': 1500, 'BCI': 2200, 'BPI': 1400, 'BSI': 1100}
@@ -268,10 +268,10 @@ def generate_market_indices():
 
 
 def generate_macro_factors():
-    """Generate daily macro factor values for the past 12 months."""
+    """Generate daily macro factor values for the past 24 months."""
     random.seed(55)
     today = date.today()
-    start_date = today - timedelta(days=365)
+    start_date = today - timedelta(days=730)
 
     factors = []
     fuel_price = 450.0

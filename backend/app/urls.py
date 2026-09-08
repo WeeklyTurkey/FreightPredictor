@@ -31,6 +31,10 @@ Endpoints:
   POST   /port-feasibility/              — Check port/vessel compatibility
   GET    /port-traffic/                   — Port business/traffic indicators
   GET    /dashboard/                      — Aggregated dashboard summary
+  POST   /auth/register/                  — Create user account
+  POST   /auth/login/                     — Obtain Bearer token
+  POST   /auth/logout/                    — Revoke current token
+  GET    /auth/me/                        — Current token owner
 """
 
 from django.urls import path, include
@@ -44,6 +48,7 @@ from app.views import (
     GenerateForecastView, CalculateCostView,
     GenerateRecommendationView, PortFeasibilityView,
     PortTrafficView, DashboardSummaryView,
+    RegisterView, LoginView, LogoutView, MeView,
 )
 
 router = DefaultRouter()
@@ -68,6 +73,12 @@ urlpatterns = [
     # Read-only computed endpoints (GET)
     path('port-traffic/', PortTrafficView.as_view(), name='port-traffic'),
     path('dashboard/', DashboardSummaryView.as_view(), name='dashboard-summary'),
+
+    # Token authentication (public register/login; authenticated logout/me)
+    path('auth/register/', RegisterView.as_view(), name='auth-register'),
+    path('auth/login/', LoginView.as_view(), name='auth-login'),
+    path('auth/logout/', LogoutView.as_view(), name='auth-logout'),
+    path('auth/me/', MeView.as_view(), name='auth-me'),
 
     # ViewSet routes (Catch-all)
     path('', include(router.urls)),

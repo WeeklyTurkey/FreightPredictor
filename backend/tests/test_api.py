@@ -7,6 +7,7 @@ Run with: python manage.py test tests
 
 from decimal import Decimal
 
+import pandas as pd
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APITestCase
@@ -159,6 +160,31 @@ class RouteAPITest(APITestCase):
         response = self.client.get('/api/v1/routes/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_list_routes_exposes_served_commodities(self):
+        from datetime import date, timedelta
+        from decimal import Decimal
+        vessel = Vessel.objects.create(
+            size_class='capesize',
+            min_dwt=100000, max_dwt=200000,
+            typical_draft=17.0, typical_beam=46.0, typical_loa=290.0,
+        )
+        for i in range(3):
+            FreightRateHistory.objects.create(
+                route=self.route, vessel_class=vessel, commodity='iron_ore',
+                date=date(2026, 1, 5) + timedelta(days=i),
+                rate_usd_per_ton=Decimal(18),
+            )
+        FreightRateHistory.objects.create(
+            route=self.route, vessel_class=vessel, commodity='coking_coal',
+            date=date(2026, 1, 8),
+            rate_usd_per_ton=Decimal(20),
+        )
+        response = self.client.get('/api/v1/routes/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        row = next(r for r in response.data['results'] if r['id'] == self.route.id)
+        # Most-served cargo first, drawn from history — never hardcoded.
+        self.assertEqual(row['commodities'], ['iron_ore', 'coking_coal'])
+
 
 class ChartererAPITest(APITestCase):
     def setUp(self):
@@ -172,6 +198,14 @@ class ChartererAPITest(APITestCase):
     def test_list_charterers(self):
         response = self.client.get('/api/v1/charterers/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_includes_scoring_inputs(self):
+        response = self.client.get('/api/v1/charterers/')
+        row = response.data['results'][0]
+        for field in ('on_time_delivery_pct', 'cargo_damage_incidents',
+                      'payment_reliability_pct', 'years_in_operation',
+                      'trust_score', 'trust_grade', 'total_voyages'):
+            self.assertIn(field, row)
 
     def test_recalculate_scores(self):
         response = self.client.post('/api/v1/charterers/recalculate-scores/')
@@ -217,6 +251,31 @@ class PortFeasibilityAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['recommended_vessel'], 'Supramax')
 
+    def test_unknown_port_returns_clear_404(self):
+        """Stale port ids (e.g. old hardcoded fallbacks) return a clear error, not a crash."""
+        response = self.client.post('/api/v1/port-feasibility/', {
+            'destination_port_id': 999999,
+            'vessel_class_id': self.supramax.id,
+            'volume_mt': 55000,
+        })
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('error', response.data)
+
+    def test_unknown_vessel_returns_clear_404(self):
+        response = self.client.post('/api/v1/port-feasibility/', {
+            'destination_port_id': self.haldia.id,
+            'vessel_class_id': 999999,
+            'volume_mt': 55000,
+        })
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('error', response.data)
+
+    def test_missing_fields_returns_400(self):
+        response = self.client.post('/api/v1/port-feasibility/', {
+            'destination_port_id': self.haldia.id,
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class DashboardAPITest(APITestCase):
     def test_dashboard_summary(self):
@@ -243,6 +302,46 @@ class MarketIndexAPITest(APITestCase):
         response = self.client.get('/api/v1/market-indices/latest/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_latest_matches_history_tail(self):
+        """Dashboard card and detail graph end on the same stored record."""
+        from datetime import date, timedelta
+        from decimal import Decimal
+        for i in range(1, 4):
+            MarketIndex.objects.create(
+                index_type='BDI', date=date(2025, 9, 1) + timedelta(days=i),
+                value=Decimal(1500 + i * 10), change_pct_24h=Decimal('0.5'),
+            )
+        latest = self.client.get('/api/v1/market-indices/latest/').data
+        bdi = next(r for r in latest if r['index_type'] == 'BDI')
+        tail = MarketIndex.objects.filter(index_type='BDI').order_by('-date').first()
+        self.assertEqual(str(tail.date), bdi['date'])
+        self.assertEqual(str(tail.value), str(bdi['value']))
+
+    def test_duplicate_date_rejected(self):
+        """One row per (index_type, date): duplicates fail, never silently fork."""
+        from datetime import date
+        from django.db import IntegrityError
+        with self.assertRaises(IntegrityError):
+            MarketIndex.objects.create(
+                index_type='BDI', date=date(2025, 9, 1),
+                value=1600, change_pct_24h=0,
+            )
+
+    def test_bdi_ingestion_upsert_is_idempotent(self):
+        """Latest-value ingestion updates in place and recomputes change."""
+        from datetime import date
+        from decimal import Decimal
+        from app.services.market_prices import store_bdi
+        obj, created = store_bdi(Decimal('1650'), date(2025, 9, 2))
+        self.assertTrue(created)
+        self.assertEqual(obj.change_pct_24h, Decimal('10.00'))  # vs 1500
+        obj2, created2 = store_bdi(Decimal('1650'), date(2025, 9, 2))
+        self.assertFalse(created2)
+        self.assertEqual(obj2.pk, obj.pk)
+        self.assertEqual(
+            MarketIndex.objects.filter(index_type='BDI', date=date(2025, 9, 2)).count(), 1,
+        )
+
 
 class PortTrafficAPITest(APITestCase):
     def setUp(self):
@@ -266,10 +365,19 @@ class PortTrafficAPITest(APITestCase):
 
 
 class FakePrediction:
-    """Minimal stand-in for Prophet's prediction DataFrame (iterrows only)."""
+    """Minimal stand-in for Prophet's prediction DataFrame.
+
+    Supports iterrows() for forecast extraction and ['yhat'] column access
+    so in-sample residual diagnostics compute real MAE values.
+    """
 
     def __init__(self, n):
         self.n = n
+
+    def __getitem__(self, key):
+        if key == 'yhat':
+            return pd.Series([20.0 + i * 0.1 for i in range(self.n)])
+        raise KeyError(key)
 
     def iterrows(self):
         for i in range(self.n):
@@ -283,6 +391,7 @@ class FakeProphet:
 
     def __init__(self, *args, **kwargs):
         self.regressors = []
+        self.kwargs = kwargs
         FakeProphet.instances.append(self)
 
     def add_regressor(self, name):
@@ -496,6 +605,218 @@ class ForecastGenerateAPITest(APITestCase):
             Forecast.objects.filter(
                 route=route, vessel_class=vessel, horizon_days=30,
             ).count(), 30,
+        )
+
+
+class ForecastAutoPersistTest(APITestCase):
+    """Automatic 90-day generation: persistence, filtering, bounds, repeats."""
+
+    def setUp(self):
+        FakeProphet.instances = []
+        self.route, self.vessel, self.start = make_route_with_history(days=20)
+        seed_regressors(self.route.destination_port, self.start)
+
+    def _saved(self, **over):
+        from app.forecasting import save_forecasts
+        from unittest import mock
+        kw = dict(
+            route_id=self.route.id, vessel_class_id=self.vessel.id,
+            commodity='coking_coal', horizon_days=90,
+        )
+        kw.update(over)
+        with mock.patch('prophet.Prophet', FakeProphet):
+            return save_forecasts(**kw)
+
+    def test_90_day_persistence_and_exact_filtering(self):
+        self.assertEqual(self._saved(), 90)
+        base = dict(
+            route=self.route.id, vessel_class=self.vessel.id,
+            commodity='coking_coal', horizon_days=90,
+        )
+        rows = Forecast.objects.filter(
+            route_id=base['route'], vessel_class_id=base['vessel_class'],
+            commodity=base['commodity'], horizon_days=base['horizon_days'],
+        )
+        self.assertEqual(rows.count(), 90)
+        self.assertTrue(all(r.horizon_days == 90 for r in rows))
+        response = self.client.get('/api/v1/forecasts/', base)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 90)
+        # A different horizon must not leak in.
+        other = self.client.get('/api/v1/forecasts/', {**base, 'horizon_days': 30})
+        self.assertEqual(other.data['count'], 0)
+
+    def test_repeated_saves_create_no_duplicates(self):
+        self._saved(horizon_days=30)
+        self._saved(horizon_days=30)
+        qs = Forecast.objects.filter(
+            route_id=self.route.id, vessel_class_id=self.vessel.id,
+            commodity='coking_coal', horizon_days=30,
+        )
+        self.assertEqual(qs.count(), 30)
+        dates = list(qs.values_list('forecast_date', flat=True))
+        self.assertEqual(len(set(dates)), 30)
+
+    def test_bounds_bracket_every_row(self):
+        self._saved(horizon_days=30)
+        for r in Forecast.objects.filter(horizon_days=30):
+            self.assertLessEqual(r.lower_bound, r.predicted_rate)
+            self.assertLessEqual(r.predicted_rate, r.upper_bound)
+
+    def test_interval_width_in_80_to_90_band(self):
+        """Prophet credible intervals sit at 85% — model parameter, not data."""
+        self._saved(horizon_days=30)
+        self.assertEqual(FakeProphet.instances[-1].kwargs.get('interval_width'), 0.85)
+
+    def test_combos_stay_isolated(self):
+        from datetime import timedelta
+        from decimal import Decimal
+        vessel2 = Vessel.objects.create(
+            size_class='panamax',
+            min_dwt=60000, max_dwt=85000,
+            typical_draft=13.5, typical_beam=32.2, typical_loa=225.0,
+        )
+        for i in range(20):
+            FreightRateHistory.objects.create(
+                route=self.route, vessel_class=vessel2, commodity='iron_ore',
+                date=self.start + timedelta(days=i),
+                rate_usd_per_ton=Decimal(18 + i * 0.05),
+            )
+        self._saved()
+        self._saved(vessel_class_id=vessel2.id, commodity='iron_ore')
+        first = Forecast.objects.filter(
+            route_id=self.route.id, vessel_class_id=self.vessel.id,
+            commodity='coking_coal', horizon_days=90,
+        ).count()
+        second = Forecast.objects.filter(
+            route_id=self.route.id, vessel_class_id=vessel2.id,
+            commodity='iron_ore', horizon_days=90,
+        ).count()
+        self.assertEqual((first, second), (90, 90))
+
+    def test_fallback_paths_keep_ordered_bounds(self):
+        from app import forecasting
+        import pandas as pd
+        df = pd.DataFrame({
+            'date': [self.start],
+            'rate_usd_per_ton': [20.0],
+        })
+        for fn in (forecasting._moving_average_forecast, forecasting._fallback_forecast):
+            rows = fn(df, 30) if fn is forecasting._moving_average_forecast else fn(30)
+            self.assertEqual(len(rows), 30)
+            for r in rows:
+                self.assertLessEqual(r['lower_bound'], r['predicted_rate'])
+                self.assertLessEqual(r['predicted_rate'], r['upper_bound'])
+
+
+class ForecastUncertaintyTest(TestCase):
+    """Bands widen with measured volatility and horizon; never invert."""
+
+    _combo_seq = 0
+
+    def _widths(self, noisy):
+        import math
+        from datetime import date, timedelta
+        from decimal import Decimal
+        from unittest import mock
+        from app import forecasting
+        FakeProphet.instances = []
+        # Unique names per call: several tests build two histories each.
+        type(self)._combo_seq += 1
+        tag = type(self)._combo_seq
+        origin = Port.objects.create(
+            name=f'Newcastle {tag}', country='Australia', port_type='origin',
+        )
+        dest = Port.objects.create(
+            name=f'Haldia {tag}', country='India', port_type='destination',
+        )
+        route = Route.objects.create(
+            origin_port=origin, destination_port=dest,
+            distance_nautical_miles=6800, typical_transit_days=19,
+        )
+        vessel = Vessel.objects.create(
+            size_class=f'class{tag}',
+            min_dwt=100000, max_dwt=200000,
+            typical_draft=17.0, typical_beam=46.0, typical_loa=290.0,
+        )
+        # Shift dates per call so seeded regressor rows never collide.
+        start = date(2026, 1, 5) + timedelta(days=tag * 100)
+        for i in range(15):
+            rate = 20 + 2.5 * math.sin(i * 1.3) if noisy else 20 + i * 0.1
+            FreightRateHistory.objects.create(
+                route=route, vessel_class=vessel, commodity='coking_coal',
+                date=start + timedelta(days=i),
+                rate_usd_per_ton=Decimal(str(round(rate, 2))),
+            )
+        seed_regressors(route.destination_port, start)
+        with mock.patch('prophet.Prophet', FakeProphet):
+            rows = forecasting.generate_forecast(
+                route.id, vessel.id, 'coking_coal', horizon_days=30,
+            )
+        self.assertEqual(len(rows), 30)
+        return rows
+
+    @staticmethod
+    def _mean_width(rows):
+        return sum(float(r['upper_bound']) - float(r['lower_bound']) for r in rows) / len(rows)
+
+    def test_volatile_history_widens_vs_stable(self):
+        stable = self._widths(noisy=False)
+        volatile = self._widths(noisy=True)
+        self.assertGreater(self._mean_width(volatile), self._mean_width(stable))
+
+    def test_stable_history_keeps_model_band(self):
+        rows = self._widths(noisy=False)
+        # Smooth data: data-driven half-width stays under the model band,
+        # so the stored band equals the model's own ±1.0.
+        self.assertTrue(all(float(r['upper_bound']) - float(r['lower_bound']) == 2.0 for r in rows))
+
+    def test_horizon_fan_grows_with_distance(self):
+        rows = self._widths(noisy=True)
+        first = float(rows[0]['upper_bound']) - float(rows[0]['lower_bound'])
+        last = float(rows[-1]['upper_bound']) - float(rows[-1]['lower_bound'])
+        self.assertGreater(last, first)
+
+    def test_widened_bounds_centered_and_ordered(self):
+        from app.forecasting import _widened_bounds
+        pred, lower, upper = _widened_bounds(
+            yhat=22.0, prophet_half_width=1.0, mae=0.8, n_rows=15,
+            step=15, horizon_days=30,
+        )
+        self.assertEqual(pred, 22.0)
+        self.assertLessEqual(lower, pred)
+        self.assertLessEqual(pred, upper)
+        self.assertAlmostEqual((upper - pred), (pred - lower), places=2)
+        # Degenerate zero-uncertainty input still brackets the forecast.
+        pred2, lower2, upper2 = _widened_bounds(22.0, 0.0, 0.0, 15, 1, 30)
+        self.assertEqual((pred2, lower2, upper2), (22.0, 22.0, 22.0))
+
+    @staticmethod
+    def _implied_confidence(rows):
+        """Mirror of the frontend tightness score: 1 - spread/level/2."""
+        spreads = [
+            (float(r['upper_bound']) - float(r['lower_bound'])) / float(r['predicted_rate'])
+            for r in rows if float(r['predicted_rate']) > 0
+        ]
+        return 1 - (sum(spreads) / len(spreads)) / 2
+
+    def test_stable_data_reaches_95_confidence(self):
+        rows = self._widths(noisy=False)
+        self.assertGreaterEqual(self._implied_confidence(rows), 0.95)
+
+    def test_volatile_data_stays_below_stable(self):
+        stable = self._implied_confidence(self._widths(noisy=False))
+        volatile = self._implied_confidence(self._widths(noisy=True))
+        self.assertLess(volatile, stable)
+        self.assertLess(volatile, 0.95)
+
+    def test_bound_dates_follow_forecast_dates(self):
+        from datetime import timedelta
+        rows = self._widths(noisy=True)
+        first = rows[0]['forecast_date']
+        self.assertEqual(
+            [r['forecast_date'] for r in rows],
+            [first + timedelta(days=i) for i in range(30)],
         )
 
 
@@ -1121,9 +1442,11 @@ class ForecastBoundsOrderingTest(APITestCase):
             results = forecasting._moving_average_forecast(df, horizon)
             self.assertEqual(len(results), horizon)
             self.assert_ordered(results)
-            # Band tracks the forecast: constant width up to rounding cents.
+            # Band tracks the forecast and fans out with horizon: widths grow
+            # monotonically with distance (uncertainty increases ahead).
             widths = [r['upper_bound'] - r['lower_bound'] for r in results]
-            self.assertLess(max(widths) - min(widths), Decimal('0.03'))
+            self.assertTrue(all(b >= a for a, b in zip(widths, widths[1:])))
+            self.assertGreater(widths[-1], widths[0])
 
     def test_flat_fallback_ordering(self):
         from app import forecasting
@@ -1163,3 +1486,72 @@ class ForecastFallbackChainTest(TestCase):
             )
         self.assertEqual(len(results), 30)
         self.assertTrue(all(r['predicted_rate'] > 0 for r in results))
+
+
+# ===========================================================================
+# Token Authentication Tests
+# ===========================================================================
+
+
+class AuthAPITest(APITestCase):
+    def _register(self, username='harbor_ops', password='S3curePass!9', email='ops@example.com'):
+        return self.client.post('/api/v1/auth/register/', {
+            'username': username, 'password': password, 'email': email,
+        })
+
+    def test_register_creates_user_with_hashed_password(self):
+        from django.contrib.auth.models import User
+        response = self._register()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = User.objects.get(username='harbor_ops')
+        self.assertNotEqual(user.password, 'S3curePass!9')
+        self.assertTrue(user.password.startswith(('pbkdf2_sha256$', 'argon2', 'bcrypt')))
+
+    def test_register_rejects_duplicate_username(self):
+        self.assertEqual(self._register().status_code, status.HTTP_201_CREATED)
+        dup = self._register()
+        self.assertEqual(dup.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_rejects_weak_password(self):
+        response = self._register(password='123')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_login_returns_bearer_token_and_me_works(self):
+        self._register()
+        response = self.client.post('/api/v1/auth/login/', {
+            'username': 'harbor_ops', 'password': 'S3curePass!9',
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        token = response.data['token']
+        self.assertTrue(len(token) > 20)
+        me = self.client.get(
+            '/api/v1/auth/me/', HTTP_AUTHORIZATION=f'Bearer {token}',
+        )
+        self.assertEqual(me.status_code, status.HTTP_200_OK)
+        self.assertEqual(me.data['username'], 'harbor_ops')
+
+    def test_login_rejects_bad_credentials(self):
+        self._register()
+        response = self.client.post('/api/v1/auth/login/', {
+            'username': 'harbor_ops', 'password': 'wrong-pass',
+        })
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_me_rejects_missing_token(self):
+        response = self.client.get('/api/v1/auth/me/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_logout_revokes_token(self):
+        self._register()
+        token = self.client.post('/api/v1/auth/login/', {
+            'username': 'harbor_ops', 'password': 'S3curePass!9',
+        }).data['token']
+        auth = {'HTTP_AUTHORIZATION': f'Bearer {token}'}
+        self.assertEqual(
+            self.client.post('/api/v1/auth/logout/', **auth).status_code,
+            status.HTTP_200_OK,
+        )
+        self.assertEqual(
+            self.client.get('/api/v1/auth/me/', **auth).status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )

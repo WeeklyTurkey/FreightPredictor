@@ -16,7 +16,7 @@ import {
  getVesselClasses,
  getCargoTypes,
 } from '../api/freightService';
-import { matchesSelection } from '../api/forecastParams';
+import { matchesSelection, normalizeCommodity, displayCommodity, filterForecastByRange } from '../api/forecastParams';
 
 export default function RateForecast() {
  const [searchParams, setSearchParams] = useSearchParams();
@@ -50,6 +50,18 @@ export default function RateForecast() {
  getVesselClasses().then(setVesselClasses).catch(() => setVesselClasses([]));
  getCargoTypes().then(setCargoTypes).catch(() => setCargoTypes([]));
  }, []);
+
+ const selectedRoute = routes.find((r) => r.id === selectedRouteId);
+
+ // Default the cargo selector to the route's own primary cargo (backend
+ // history data) whenever the current selection isn't served on this route.
+ // Mock routes carry no cargo list, so the default stays untouched there.
+ useEffect(() => {
+ if (!selectedRoute || !Array.isArray(selectedRoute.cargoes) || selectedRoute.cargoes.length === 0) return;
+ if (!selectedRoute.cargoes.includes(normalizeCommodity(selectedCargo))) {
+ setSelectedCargo(displayCommodity(selectedRoute.cargoes[0]));
+ }
+ }, [selectedRoute, selectedCargo]);
 
  const requestSeq = useRef(0);
 
@@ -91,29 +103,20 @@ export default function RateForecast() {
  const handleCargoChange = (e) => setSelectedCargo(e.target.value);
  const handleDateRangeChange = (range) => setDateRange(range);
 
- const selectedRoute = routes.find((r) => r.id === selectedRouteId);
-
  const getFilteredData = () => {
  if (!forecastData) return null;
  // Date-based filtering: works for any point cadence (daily live rows
  // or weekly mock rows). The full forecast tail is always kept so the
  // 90-day projection stays visible in every range.
- const ranges = { '6m': 180, '1y': 365, '2y': 730 };
- const days = ranges[dateRange] || 730;
- const allDates = (forecastData.historical || []).map((h) => h.date).sort();
- const cutoff = allDates.length
- ? new Date(new Date(allDates[allDates.length - 1]).getTime() - days * 86400000)
- : null;
- const inRange = (d) => !cutoff || new Date(d.date) >= cutoff;
- const histSlice = (forecastData.historical || []).filter(inRange);
- const histDates = new Set(histSlice.map((h) => h.date));
- const combinedSlice = (forecastData.combined || []).filter(
- (c) => histDates.has(c.date) || c.forecast != null
+ const { historical, combined } = filterForecastByRange(
+ forecastData.historical,
+ forecastData.combined,
+ dateRange,
  );
  return {
  ...forecastData,
- historical: histSlice,
- combined: combinedSlice,
+ historical,
+ combined,
  };
  };
 
@@ -229,6 +232,36 @@ export default function RateForecast() {
  <Download className="w-4 h-4" /> Export
  </button>
  </div> */}
+ </div>
+ )}
+
+ {/* Now-graphing summary: exactly what the chart below renders */}
+ {selectedRoute && forecastData && !forecastData.isEmpty && (
+ <div className="card p-4 mb-6 border-teal-200 bg-teal-50/40">
+ <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+ <div>
+ <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Now graphing</p>
+ <p className="text-base font-bold text-slate-900">{selectedRoute.origin_port} → {selectedRoute.destination_port}</p>
+ </div>
+ <div>
+ <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Cargo</p>
+ <p className="text-base font-bold text-teal-700">{selectedCargo || '—'}</p>
+ </div>
+ <div>
+ <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Vessel class</p>
+ <p className="text-base font-semibold text-slate-800">{selectedVesselClass}</p>
+ </div>
+ <div>
+ <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Horizon</p>
+ <p className="text-base font-semibold text-slate-800 font-mono">90-day</p>
+ </div>
+ {(forecastData.forecast || []).length > 0 && (
+ <div className="ml-auto">
+ <p className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Model confidence</p>
+ <p className="text-base font-bold text-slate-900 font-mono">{((forecastData.confidence || 0) * 100).toFixed(0)}%</p>
+ </div>
+ )}
+ </div>
  </div>
  )}
 

@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third-party
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     # Project
     'app',
@@ -69,19 +70,25 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # ---------------------------------------------------------------------------
-# Database — PostgreSQL
+# Database — SQLite for local development (backend/db.sqlite3).
+# PostgreSQL settings are retained below, disabled, for non-local use.
+# No DATABASE_* environment variable overrides SQLite here.
 # ---------------------------------------------------------------------------
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DATABASE_NAME', 'freightcast'),
-        'USER': os.environ.get('DATABASE_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD', ''),
-        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
-        'PORT': os.environ.get('DATABASE_PORT', '5432'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Disabled PostgreSQL configuration (kept for reference, not used locally):
+# 'ENGINE': 'django.db.backends.postgresql',
+# 'NAME': os.environ.get('DATABASE_NAME', 'freightcast'),
+# 'USER': os.environ.get('DATABASE_USER', 'apple'),
+# 'PASSWORD': os.environ.get('DATABASE_PASSWORD', ''),
+# 'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
+# 'PORT': os.environ.get('DATABASE_PORT', '5432'),
 
 
 # ---------------------------------------------------------------------------

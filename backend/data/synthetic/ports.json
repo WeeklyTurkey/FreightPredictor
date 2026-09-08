@@ -47,8 +47,8 @@
       "max_draft": 7.5,
       "max_beam": 36.0,
       "max_loa": 220.0,
-      "ships_currently_at_port": 7,
-      "expected_incoming_shipments": 9
+      "ships_currently_at_port": 6,
+      "expected_incoming_shipments": 6
     },
     {
       "name": "Paradip",
@@ -57,8 +57,8 @@
       "max_draft": 14.5,
       "max_beam": 45.0,
       "max_loa": 280.0,
-      "ships_currently_at_port": 20,
-      "expected_incoming_shipments": 6
+      "ships_currently_at_port": 12,
+      "expected_incoming_shipments": 12
     },
     {
       "name": "Visakhapatnam",
@@ -67,8 +67,8 @@
       "max_draft": 16.5,
       "max_beam": 48.0,
       "max_loa": 300.0,
-      "ships_currently_at_port": 25,
-      "expected_incoming_shipments": 14
+      "ships_currently_at_port": 23,
+      "expected_incoming_shipments": 10
     },
     {
       "name": "Chennai",
@@ -77,8 +77,8 @@
       "max_draft": 12.0,
       "max_beam": 42.0,
       "max_loa": 260.0,
-      "ships_currently_at_port": 17,
-      "expected_incoming_shipments": 11
+      "ships_currently_at_port": 14,
+      "expected_incoming_shipments": 9
     }
   ]
 }

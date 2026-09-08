@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Ship,
   ChevronDown,
@@ -9,12 +10,12 @@ import {
   Users,
   Activity,
   Anchor,
-  Gauge,
   Fuel,
   Calculator,
   Shield,
   Search,
   Bell,
+  LogOut,
   Menu,
   X,
   Table,
@@ -24,13 +25,12 @@ import {
 const navSections = [
   {
     label: 'Dashboard',
-    path: '/',
+    path: '/dashboard',
     icon: LayoutDashboard,
     items: [
-      { label: 'Pipeline Overview', desc: 'KPIs, fleet status & market data', path: '/', icon: Activity },
+      { label: 'Pipeline Overview', desc: 'KPIs, fleet status & market data', path: '/dashboard', icon: Activity },
       { label: 'Active Voyages', desc: 'Inbound vessel tracking', path: '/voyages', icon: Ship },
       { label: 'Port Status', desc: 'East coast congestion metrics', path: '/ports', icon: Anchor },
-      { label: 'Fleet Readiness', desc: 'Vessel availability dashboard', path: '/fleet', icon: Gauge },
     ],
   },
   {
@@ -40,8 +40,8 @@ const navSections = [
     items: [
       { label: 'ML Forecast', desc: '90-day Prophet projections', path: '/rates/forecast', icon: TrendingUp },
       { label: 'Rate Breakdown', desc: 'Base freight vs BAF analysis', path: '/rates/breakdown', icon: Table },
-      { label: 'BDI', desc: 'Baltic Dry Index daily trends', path: '/rates/bdi', icon: Activity },
-      { label: 'VLSFO', desc: 'VLSFO bunker fuel price trends', path: '/rates/vlsfo', icon: Fuel },
+      { label: 'BDI Index', desc: 'Baltic Dry Index daily trends', path: '/rates/index-graph?type=BDI', icon: Activity },
+      { label: 'VLSFO Index', desc: 'VLSFO bunker fuel price trends', path: '/rates/index-graph?type=VLSFO', icon: Fuel },
     ],
   },
   {
@@ -146,6 +146,7 @@ function SearchOverlay({ onClose }) {
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -196,45 +197,43 @@ export default function Navbar() {
     <>
       {/* ── White Apple-style Navbar ── */}
       <header className="apple-nav">
-        <nav className="w-full h-full px-4 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            {/* ── Logo (left) ── */}
-            <Link
-              to="/"
-              className="flex items-center gap-2 shrink-0 group"
-              onMouseEnter={() => { setActiveDropdown(null); setSearchOpen(false); }}
-            >
-              <div className="p-1 rounded-md bg-gradient-to-br from-teal-500 to-emerald-600 group-hover:from-teal-400 group-hover:to-emerald-500 transition-all duration-300 shadow-sm">
-                <Ship className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-slate-900 font-semibold text-[14px] tracking-tight group-hover:text-teal-700 transition-colors">
-                FreightCast
-              </span>
-            </Link>
-
-            {/* ── Desktop Nav Links (left aligned) ── */}
-            <div className="hidden md:flex items-center gap-0">
-              {navSections.map((section) => {
-                const active = isActive(section.path);
-                return (
-                  <div
-                    key={section.label}
-                    onMouseEnter={() => handleDropdownEnter(section.label)}
-                    onMouseLeave={handleDropdownLeave}
-                  >
-                    <button
-                      onClick={() => {
-                        const lastPath = sessionStorage.getItem(`last_path_${section.label}`) || section.items[0].path;
-                        handleNavigate(lastPath);
-                      }}
-                      className={`apple-nav-link ${active ? 'apple-nav-link--active' : ''}`}
-                    >
-                      {section.label}
-                    </button>
-                  </div>
-                );
-              })}
+        <nav className="relative w-full h-full px-4 lg:px-8 flex items-center justify-between">
+          {/* ── Logo (left) ── */}
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-2 shrink-0 group"
+            onMouseEnter={() => { setActiveDropdown(null); setSearchOpen(false); }}
+          >
+            <div className="p-1 rounded-md bg-gradient-to-br from-teal-500 to-emerald-600 group-hover:from-teal-400 group-hover:to-emerald-500 transition-all duration-300 shadow-sm">
+              <Ship className="w-4 h-4 text-white" />
             </div>
+            <span className="text-slate-900 font-semibold text-[14px] tracking-tight group-hover:text-teal-700 transition-colors">
+              FreightCast
+            </span>
+          </Link>
+
+          {/* ── Desktop Nav Links (horizontally centered) ── */}
+          <div className="hidden md:flex items-center gap-0 absolute left-1/2 -translate-x-1/2">
+            {navSections.map((section) => {
+              const active = isActive(section.path);
+              return (
+                <div
+                  key={section.label}
+                  onMouseEnter={() => handleDropdownEnter(section.label)}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <button
+                    onClick={() => {
+                      const lastPath = sessionStorage.getItem(`last_path_${section.label}`) || section.items[0].path;
+                      handleNavigate(lastPath);
+                    }}
+                    className={`apple-nav-link ${active ? 'apple-nav-link--active' : ''}`}
+                  >
+                    {section.label}
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
           {/* ── Right icons ── */}
@@ -253,6 +252,16 @@ export default function Navbar() {
             >
               <Bell className="w-[15px] h-[15px]" />
               <span className="absolute top-2.5 right-2 w-1.5 h-1.5 bg-teal-500 rounded-full" />
+            </button>
+
+            <button
+              className="apple-nav-icon hidden md:flex"
+              onClick={async () => { await logout(); navigate('/'); }}
+              onMouseEnter={() => setActiveDropdown(null)}
+              title="Sign out"
+              aria-label="Sign out"
+            >
+              <LogOut className="w-[15px] h-[15px]" />
             </button>
 
             <button

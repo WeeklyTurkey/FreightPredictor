@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
- Activity,
- Fuel,
- Ship,
  TrendingUp,
  ArrowRight,
  MapPin,
@@ -17,8 +14,8 @@ import {
  getMarketKPIs,
  getRoutes,
  getRecommendations,
- getForecast,
 } from '../api/freightService';
+import { forecastUrlForRoute } from '../api/forecastParams';
 
 
 
@@ -26,8 +23,6 @@ export default function Overview() {
  const [kpis, setKpis] = useState(null);
  const [routes, setRoutes] = useState([]);
  const [recommendations, setRecommendations] = useState([]);
- const [forecastData, setForecastData] = useState(null);
- const [selectedRoute, setSelectedRoute] = useState(null);
  const [loading, setLoading] = useState(true);
 
  useEffect(() => {
@@ -39,16 +34,9 @@ export default function Overview() {
  setKpis(kpisData);
  setRoutes(routesData);
  setRecommendations(recsData);
- setSelectedRoute(routesData[0]);
- getForecast(routesData[0].id).then(setForecastData);
  setLoading(false);
  });
  }, []);
-
- const handleRouteSelect = (route) => {
- setSelectedRoute(route);
- getForecast(route.id).then(setForecastData);
- };
 
  if (loading || !kpis) {
  return (
@@ -76,46 +64,35 @@ export default function Overview() {
  <p className="text-sm text-slate-400 mt-1">High-level market analytics & predictive insights</p>
  </div>
 
- {/* KPI Row */}
- <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+ {/* KPI Row — BDI/VLSFO share their detail pages' data source and periods */}
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
  <MetricCard
  label="Baltic Dry Index"
- value={kpis.baltic_dry_index.value.toLocaleString()}
- unit="$/day"
+ value={Number(kpis.baltic_dry_index.value).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+ unit="points"
  changePct={kpis.baltic_dry_index.change_pct}
  trend={kpis.baltic_dry_index.trend}
- subtitle={`Capesize: ${kpis.baltic_dry_index.components.capesize.toLocaleString()}`}
- chartData={kpis.baltic_dry_index.historical || null}
+ subtitle={`As of ${kpis.baltic_dry_index.date} · Capesize ${Number(kpis.baltic_dry_index.components.capesize).toLocaleString()}`}
  disableGraph={true}
  linkTo="/rates/bdi"
  />
  <MetricCard
  label="VLSFO Singapore"
- value={`$${kpis.bunker_fuel.vlsfo_singapore.value}`}
+ value={`$${Number(kpis.bunker_fuel.vlsfo_singapore.value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
  unit="/MT"
  changePct={kpis.bunker_fuel.vlsfo_singapore.change_pct}
  trend={kpis.bunker_fuel.vlsfo_singapore.change_pct < 0 ? 'down' : 'up'}
- subtitle={`Fujairah: $${kpis.bunker_fuel.vlsfo_fujairah.value}/MT`}
- chartData={kpis.bunker_fuel.vlsfo_singapore.historical || null}
+ subtitle={`As of ${kpis.bunker_fuel.vlsfo_singapore.date} · Fujairah $${kpis.bunker_fuel.vlsfo_fujairah.value}/MT`}
  disableGraph={true}
  linkTo="/rates/vlsfo"
  />
  <MetricCard
- icon={Ship}
- label="Active Shipments"
- value={kpis.active_shipments}
- unit="voyages"
- accent="slate"
- subtitle={`${kpis.fleet_readiness.available_vessels}/${kpis.fleet_readiness.total_fleet} vessels ready`}
- disableGraph={true}
- />
- <MetricCard
  icon={TrendingUp}
- label="30-Day Rate Projection"
- value={`${kpis.rate_projection_30d.direction === 'up' ? '↑' : '↓'} ${kpis.rate_projection_30d.magnitude_pct}%`}
- accent={kpis.rate_projection_30d.direction === 'up' ? 'rose' : 'emerald'}
+ label="90-Day Rate Projection"
+ value={`${kpis.rate_projection_90d.direction === 'up' ? '↑' : '↓'} ${kpis.rate_projection_90d.magnitude_pct}%`}
  subtitle="Forecast across all routes"
  disableGraph={true}
+ linkTo="/rates/forecast"
  />
  </div>
 
@@ -132,17 +109,14 @@ export default function Overview() {
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 max-h-96 overflow-y-auto pr-1">
  {routes.map((route) => (
- <button
+ <Link
  key={route.id}
- onClick={() => handleRouteSelect(route)}
- className={`w-full text-left p-3 border rounded-xl transition-all duration-200 ${
- selectedRoute?.id === route.id
- ? 'bg-teal-50 border-teal-200 shadow-sm'
- : 'bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50'
- }`}
+ to={forecastUrlForRoute(route.id)}
+ aria-label={`Open forecast for ${route.origin_port} to ${route.destination_port}, ${route.primary_cargo}`}
+ className="w-full text-left p-3 border rounded-xl transition-all duration-200 bg-white border-slate-100 hover:border-teal-300 hover:bg-teal-50/40 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-teal-500 group"
  >
  <div className="flex items-center justify-between mb-2">
- <span className="text-sm font-semibold text-slate-800">
+ <span className="text-sm font-semibold text-slate-800 group-hover:text-teal-800">
  {route.origin_port} → {route.destination_port}
  </span>
  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${route.rate_change_pct > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
@@ -158,9 +132,11 @@ export default function Overview() {
  </div>
  <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
  <span className="text-xs font-medium text-slate-400">{route.distance_nm} nm</span>
- <span className="text-sm font-bold text-teal-700">${route.current_rate}/MT</span>
+ <span className="text-xs font-medium text-teal-700 inline-flex items-center gap-1">
+ View forecast <ArrowRight className="w-3 h-3" />
+ </span>
  </div>
- </button>
+ </Link>
  ))}
  </div>
  </div>

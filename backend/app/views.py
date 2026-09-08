@@ -21,6 +21,8 @@ from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from app.authentication import BearerTokenAuthentication
+
 from app.models import (
     Port, Vessel, Route, FreightRateHistory, Forecast,
     Charterer, MarketIndex, MacroFactor, CostBreakdown, Recommendation,
@@ -648,3 +650,100 @@ def _recommend_vessel_for_volume(volume_mt):
         return 'Panamax'
     else:
         return 'Capesize'
+
+
+# ===========================================================================
+# Authentication (token-based; Django password hashing, no plaintext storage)
+# ===========================================================================
+
+
+class RegisterView(APIView):
+    """Create a user with a securely hashed password. Open endpoint."""
+
+    permission_classes = []
+
+    def post(self, request):
+        from django.contrib.auth.models import User
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        username = str(request.data.get('username', '')).strip()
+        password = request.data.get('password', '')
+        email = str(request.data.get('email', '')).strip()
+
+        if not username or not password:
+            return Response(
+                {'error': 'Username and password are required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if User.objects.filter(username=username).exists():
+            return Response(
+                {'error': 'That username is already taken.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            validate_password(password)
+        except DjangoValidationError as exc:
+            return Response(
+                {'error': ' '.join(exc.messages)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user = User.objects.create_user(
+            username=username, password=password, email=email,
+        )
+        return Response(
+            {'id': user.id, 'username': user.username, 'email': user.email},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class LoginView(APIView):
+    """Verify credentials and return a Bearer token. Open endpoint."""
+
+    permission_classes = []
+
+    def post(self, request):
+        from django.contrib.auth import authenticate
+        from rest_framework.authtoken.models import Token
+
+        username = str(request.data.get('username', '')).strip()
+        password = request.data.get('password', '')
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return Response(
+                {'error': 'Invalid username or password.'},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user': {'id': user.id, 'username': user.username, 'email': user.email},
+        })
+
+
+class LogoutView(APIView):
+    """Revoke the caller's token. Requires authentication."""
+
+    authentication_classes = [BearerTokenAuthentication]
+
+    def post(self, request):
+        if request.auth is not None:
+            request.auth.delete()
+        return Response({'detail': 'Logged out.'})
+
+
+class MeView(APIView):
+    """Return the token owner. Requires authentication."""
+
+    authentication_classes = [BearerTokenAuthentication]
+
+    def get(self, request):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response(
+                {'detail': 'Authentication credentials were not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        return Response({
+            'id': user.id, 'username': user.username, 'email': user.email,
+        })

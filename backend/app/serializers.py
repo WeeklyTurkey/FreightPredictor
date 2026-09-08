@@ -68,13 +68,26 @@ class RouteListSerializer(serializers.ModelSerializer):
     origin_port_name = serializers.CharField(source='origin_port.name', read_only=True)
     origin_country = serializers.CharField(source='origin_port.country', read_only=True)
     destination_port_name = serializers.CharField(source='destination_port.name', read_only=True)
+    commodities = serializers.SerializerMethodField()
+
+    def get_commodities(self, route):
+        """Distinct cargo keys served on this route (real history data),
+        ordered most-frequent first so [0] is the route's primary cargo."""
+        from django.db.models import Count
+        return list(
+            FreightRateHistory.objects.filter(route=route)
+            .values_list('commodity', flat=True)
+            .annotate(count=Count('id'))
+            .order_by('-count', 'commodity')
+            .values_list('commodity', flat=True)
+        )
 
     class Meta:
         model = Route
         fields = [
             'id', 'origin_port_name', 'origin_country',
             'destination_port_name', 'distance_nautical_miles',
-            'typical_transit_days',
+            'typical_transit_days', 'commodities',
         ]
 
 
@@ -119,7 +132,12 @@ class ChartererListSerializer(serializers.ModelSerializer):
     """Lightweight charterer for list views."""
     class Meta:
         model = Charterer
-        fields = ['id', 'name', 'country', 'trust_score', 'trust_grade', 'total_voyages']
+        fields = [
+            'id', 'name', 'country', 'trust_score', 'trust_grade',
+            'total_voyages', 'on_time_delivery_pct',
+            'cargo_damage_incidents', 'payment_reliability_pct',
+            'years_in_operation',
+        ]
 
 
 class MarketIndexSerializer(serializers.ModelSerializer):

@@ -274,50 +274,8 @@ mockRoutes.forEach((route) => {
 mockForecast['default'] = mockForecast[mockRoutes[0].id];
 
 // --- Market KPIs ---
-export const mockMarketKPIs = {
-  baltic_dry_index: {
-    value: 1842,
-    unit: '$/day',
-    change: 47,
-    change_pct: 2.6,
-    trend: 'up',
-    components: {
-      capesize: 2840,
-      panamax: 1620,
-      supramax: 1295,
-    },
-  },
-  bunker_fuel: {
-    vlsfo_singapore: {
-      value: 612,
-      unit: '$/MT',
-      change: -8,
-      change_pct: -1.3,
-    },
-    vlsfo_fujairah: {
-      value: 598,
-      unit: '$/MT',
-      change: -5,
-      change_pct: -0.8,
-    },
-    ifo380_singapore: {
-      value: 545,
-      unit: '$/MT',
-      change: -12,
-      change_pct: -2.2,
-    },
-  },
-  active_shipments: 14,
-  fleet_readiness: {
-    available_vessels: 23,
-    total_fleet: 31,
-    readiness_pct: 74.2,
-  },
-  rate_projection_30d: {
-    direction: 'up',
-    magnitude_pct: 4.8,
-  },
-};
+// Defined after the BDI/VLSFO mocks (see below) so the Overview head values
+// stay identical to the detail pages. (Declaration moved below mockVlsfo.)
 
 // --- Market Ticker ---
 export const mockMarketTicker = [
@@ -581,11 +539,17 @@ export const mockCharterers = [
     contracts_active: 4,
     total_contracts: 28,
     trust_score: 92,
+    trust_grade: 'A',
     on_time_delivery_rate: 94.3,
     demurrage_incidents: 2,
     total_demurrage_paid: 145000,
     dispute_count: 1,
     dispute_resolution_rate: 100,
+    on_time_delivery_pct: 94.3,
+    cargo_damage_incidents: 2,
+    payment_reliability_pct: 96,
+    years_in_operation: 22,
+    total_voyages: 28,
     avg_payment_days: 21,
     credit_rating: 'AA',
     total_volume_mt: 4200000,
@@ -600,11 +564,17 @@ export const mockCharterers = [
     contracts_active: 3,
     total_contracts: 19,
     trust_score: 88,
+    trust_grade: 'A',
     on_time_delivery_rate: 89.1,
     demurrage_incidents: 4,
     total_demurrage_paid: 320000,
     dispute_count: 2,
     dispute_resolution_rate: 95,
+    on_time_delivery_pct: 89.1,
+    cargo_damage_incidents: 4,
+    payment_reliability_pct: 90,
+    years_in_operation: 18,
+    total_voyages: 19,
     avg_payment_days: 28,
     credit_rating: 'A+',
     total_volume_mt: 3100000,
@@ -619,11 +589,17 @@ export const mockCharterers = [
     contracts_active: 5,
     total_contracts: 31,
     trust_score: 85,
+    trust_grade: 'A',
     on_time_delivery_rate: 86.7,
     demurrage_incidents: 6,
     total_demurrage_paid: 510000,
     dispute_count: 3,
     dispute_resolution_rate: 88,
+    on_time_delivery_pct: 86.7,
+    cargo_damage_incidents: 6,
+    payment_reliability_pct: 82,
+    years_in_operation: 15,
+    total_voyages: 31,
     avg_payment_days: 32,
     credit_rating: 'A',
     total_volume_mt: 5500000,
@@ -638,11 +614,17 @@ export const mockCharterers = [
     contracts_active: 2,
     total_contracts: 12,
     trust_score: 81,
+    trust_grade: 'B',
     on_time_delivery_rate: 83.5,
     demurrage_incidents: 3,
     total_demurrage_paid: 210000,
     dispute_count: 2,
     dispute_resolution_rate: 90,
+    on_time_delivery_pct: 83.5,
+    cargo_damage_incidents: 3,
+    payment_reliability_pct: 85,
+    years_in_operation: 12,
+    total_voyages: 12,
     avg_payment_days: 30,
     credit_rating: 'A-',
     total_volume_mt: 1800000,
@@ -657,11 +639,17 @@ export const mockCharterers = [
     contracts_active: 6,
     total_contracts: 42,
     trust_score: 90,
+    trust_grade: 'A',
     on_time_delivery_rate: 91.2,
     demurrage_incidents: 5,
     total_demurrage_paid: 380000,
     dispute_count: 1,
     dispute_resolution_rate: 100,
+    on_time_delivery_pct: 91.2,
+    cargo_damage_incidents: 5,
+    payment_reliability_pct: 92,
+    years_in_operation: 25,
+    total_voyages: 42,
     avg_payment_days: 25,
     credit_rating: 'AA-',
     total_volume_mt: 6800000,
@@ -676,11 +664,17 @@ export const mockCharterers = [
     contracts_active: 2,
     total_contracts: 15,
     trust_score: 76,
+    trust_grade: 'B',
     on_time_delivery_rate: 78.4,
     demurrage_incidents: 7,
     total_demurrage_paid: 620000,
     dispute_count: 4,
     dispute_resolution_rate: 75,
+    on_time_delivery_pct: 78.4,
+    cargo_damage_incidents: 7,
+    payment_reliability_pct: 70,
+    years_in_operation: 14,
+    total_voyages: 15,
     avg_payment_days: 38,
     credit_rating: 'BBB+',
     total_volume_mt: 2400000,
@@ -695,11 +689,17 @@ export const mockCharterers = [
     contracts_active: 1,
     total_contracts: 8,
     trust_score: 64,
+    trust_grade: 'C',
     on_time_delivery_rate: 71.2,
     demurrage_incidents: 5,
     total_demurrage_paid: 440000,
     dispute_count: 3,
     dispute_resolution_rate: 60,
+    on_time_delivery_pct: 71.2,
+    cargo_damage_incidents: 5,
+    payment_reliability_pct: 62,
+    years_in_operation: 9,
+    total_voyages: 8,
     avg_payment_days: 45,
     credit_rating: 'BB+',
     total_volume_mt: 950000,
@@ -714,11 +714,17 @@ export const mockCharterers = [
     contracts_active: 1,
     total_contracts: 5,
     trust_score: 48,
+    trust_grade: 'D',
     on_time_delivery_rate: 62.8,
     demurrage_incidents: 4,
     total_demurrage_paid: 380000,
     dispute_count: 3,
     dispute_resolution_rate: 50,
+    on_time_delivery_pct: 62.8,
+    cargo_damage_incidents: 4,
+    payment_reliability_pct: 55,
+    years_in_operation: 7,
+    total_voyages: 5,
     avg_payment_days: 52,
     credit_rating: 'BB',
     total_volume_mt: 620000,
@@ -908,12 +914,81 @@ export const mockRecommendations = [
 
 // --- Port Status ---
 export const mockPortStatus = [
-  { port: 'Paradip', status: 'Congested', vessels_waiting: 14, avg_wait_days: 3.5, berth_utilization: 92 },
-  { port: 'Visakhapatnam', status: 'Moderate', vessels_waiting: 6, avg_wait_days: 1.8, berth_utilization: 74 },
-  { port: 'Haldia', status: 'Congested', vessels_waiting: 11, avg_wait_days: 4.2, berth_utilization: 88 },
-  { port: 'Chennai', status: 'Clear', vessels_waiting: 3, avg_wait_days: 0.8, berth_utilization: 56 },
-  { port: 'Dhamra', status: 'Moderate', vessels_waiting: 5, avg_wait_days: 1.5, berth_utilization: 68 },
+  { id: 'paradip', port: 'Paradip', country: 'India', status: 'Congested', ships_in_port: 9, vessels_waiting: 14, avg_wait_days: 3.5, berth_utilization: 92, expected_incoming: 6 },
+  { id: 'visakhapatnam', port: 'Visakhapatnam', country: 'India', status: 'Moderate', ships_in_port: 5, vessels_waiting: 6, avg_wait_days: 1.8, berth_utilization: 74, expected_incoming: 4 },
+  { id: 'haldia', port: 'Haldia', country: 'India', status: 'Congested', ships_in_port: 7, vessels_waiting: 11, avg_wait_days: 4.2, berth_utilization: 88, expected_incoming: 5 },
+  { id: 'chennai', port: 'Chennai', country: 'India', status: 'Clear', ships_in_port: 4, vessels_waiting: 3, avg_wait_days: 0.8, berth_utilization: 56, expected_incoming: 3 },
+  { id: 'dhamra', port: 'Dhamra', country: 'India', status: 'Moderate', ships_in_port: 4, vessels_waiting: 5, avg_wait_days: 1.5, berth_utilization: 68, expected_incoming: 3 },
 ];
+
+// Mock port registry with physical limits (mirrors GET /ports/ shape for
+// the detail view; live data comes from the backend Port records).
+export const mockPorts = [
+  { id: 'visakhapatnam', name: 'Visakhapatnam', country: 'India', port_type: 'destination', max_draft: 16.5, max_beam: 45.0, max_loa: 300.0, ships_currently_at_port: 5, expected_incoming_shipments: 4 },
+  { id: 'paradip', name: 'Paradip', country: 'India', port_type: 'destination', max_draft: 14.5, max_beam: 40.0, max_loa: 260.0, ships_currently_at_port: 9, expected_incoming_shipments: 6 },
+  { id: 'chennai', name: 'Chennai', country: 'India', port_type: 'destination', max_draft: 12.0, max_beam: 35.0, max_loa: 250.0, ships_currently_at_port: 4, expected_incoming_shipments: 3 },
+  { id: 'haldia', name: 'Haldia', country: 'India', port_type: 'destination', max_draft: 7.5, max_beam: 30.0, max_loa: 200.0, ships_currently_at_port: 7, expected_incoming_shipments: 5 },
+  { id: 'dhamra', name: 'Dhamra', country: 'India', port_type: 'destination', max_draft: 14.0, max_beam: 38.0, max_loa: 250.0, ships_currently_at_port: 4, expected_incoming_shipments: 3 },
+];
+
+// --- Simulated vessel schedules (per-port ship activity) ---
+// Explicitly SIMULATED planning data: there is no live AIS feed on the
+// backend, so getVesselSchedule() serves this in every mode and the UI must
+// badge it as simulated. Statuses: arriving | in_port | waiting | departing.
+export const MOCK_SCHEDULE_UPDATED = 'Simulated snapshot — illustrative planning data';
+
+export const MOCK_VESSEL_SCHEDULE = {
+  Paradip: [
+    { id: 'v-pd-01', name: 'Pacific Pioneer', imo: 'IMO 9732014', vesselClass: 'Capesize', vesselType: 'Bulk carrier', cargo: 'Iron ore', volumeMt: 165000, arrival: '2026-09-06 06:30', departure: '2026-09-09 18:00', status: 'in_port', berth: 'Berth CB-2 (loading)', draft: 17.8, loa: 292, beam: 45, charterer: 'OceanBulk Carriers', delayHrs: 0 },
+    { id: 'v-pd-02', name: 'Meridian Star', imo: 'IMO 9688117', vesselClass: 'Panamax', vesselType: 'Bulk carrier', cargo: 'Coking coal', volumeMt: 74000, arrival: '2026-09-07 11:00', departure: '2026-09-10 09:00', status: 'in_port', berth: 'Berth EQ-1 (discharging)', draft: 13.6, loa: 225, beam: 32.2, charterer: 'Eastern Charter Co.', delayHrs: 6 },
+    { id: 'v-pd-03', name: 'Coral Endeavour', imo: 'IMO 9814452', vesselClass: 'Supramax', vesselType: 'Bulk carrier', cargo: 'Limestone', volumeMt: 52000, arrival: '2026-09-05 22:15', departure: 'TBC — awaiting berth', status: 'waiting', berth: 'Anchorage P-3', draft: 12.1, loa: 190, beam: 32.3, charterer: 'Harbourline Logistics', delayHrs: 58 },
+    { id: 'v-pd-04', name: 'Atlantic Resolve', imo: 'IMO 9745090', vesselClass: 'Capesize', vesselType: 'Bulk carrier', cargo: 'Iron ore', volumeMt: 172000, arrival: 'ETA 2026-09-10 04:00', departure: 'TBC', status: 'arriving', berth: 'Berth TBD', draft: 18.1, loa: 295, beam: 45, charterer: 'OceanBulk Carriers', delayHrs: 0 },
+    { id: 'v-pd-05', name: 'Sea Virtue', imo: 'IMO 9623371', vesselClass: 'Panamax', vesselType: 'Bulk carrier', cargo: 'Non-coking coal', volumeMt: 68000, arrival: '2026-09-03 14:45', departure: '2026-09-08 02:30', status: 'departing', berth: 'Sailed from EQ-3', draft: 12.9, loa: 222, beam: 32.2, charterer: 'Coastal Freight Ltd.', delayHrs: 11 },
+  ],
+  Visakhapatnam: [
+    { id: 'v-vz-01', name: 'Vizag Venture', imo: 'IMO 9790126', vesselClass: 'Capesize', vesselType: 'Bulk carrier', cargo: 'Coking coal', volumeMt: 158000, arrival: '2026-09-06 19:20', departure: '2026-09-09 12:00', status: 'in_port', berth: 'Berth VQ-4 (discharging)', draft: 17.2, loa: 289, beam: 45, charterer: 'Deccan Steel Procurement', delayHrs: 0 },
+    { id: 'v-vz-02', name: 'Northern Laurel', imo: 'IMO 9718843', vesselClass: 'Panamax', vesselType: 'Bulk carrier', cargo: 'Bauxite', volumeMt: 71000, arrival: 'ETA 2026-09-09 08:00', departure: 'TBC', status: 'arriving', berth: 'Berth TBD', draft: 13.2, loa: 224, beam: 32.2, charterer: 'Alumina Traders', delayHrs: 0 },
+    { id: 'v-vz-03', name: 'Bay Crest', imo: 'IMO 9833118', vesselClass: 'Supramax', vesselType: 'Bulk carrier', cargo: 'Fertiliser', volumeMt: 48000, arrival: '2026-09-04 09:10', departure: 'TBC — awaiting berth', status: 'waiting', berth: 'Anchorage V-1', draft: 11.4, loa: 186, beam: 32.3, charterer: 'AgriBulk India', delayHrs: 31 },
+    { id: 'v-vz-04', name: 'Golden Wake', imo: 'IMO 9655102', vesselClass: 'Panamax', vesselType: 'Bulk carrier', cargo: 'Iron ore', volumeMt: 73000, arrival: '2026-09-02 21:00', departure: '2026-09-07 23:40', status: 'departing', berth: 'Sailed from VQ-2', draft: 13.8, loa: 228, beam: 32.2, charterer: 'Eastern Charter Co.', delayHrs: 4 },
+  ],
+  Haldia: [
+    { id: 'v-ha-01', name: 'Hooghly Trader', imo: 'IMO 9776455', vesselClass: 'Supramax', vesselType: 'Bulk carrier', cargo: 'Non-coking coal', volumeMt: 54000, arrival: '2026-09-06 03:50', departure: '2026-09-09 20:00', status: 'in_port', berth: 'Berth HDC-3 (discharging)', draft: 11.8, loa: 189, beam: 32.3, charterer: 'Bengal Power Fuels', delayHrs: 9 },
+    { id: 'v-ha-02', name: 'River Pearl', imo: 'IMO 9699024', vesselClass: 'Supramax', vesselType: 'Bulk carrier', cargo: 'Limestone', volumeMt: 50000, arrival: '2026-09-05 16:30', departure: 'TBC — draft restriction', status: 'waiting', berth: 'Anchorage Sagar Roads', draft: 12.4, loa: 190, beam: 32.3, charterer: 'Harbourline Logistics', delayHrs: 74 },
+    { id: 'v-ha-03', name: 'Delta Mariner', imo: 'IMO 9820771', vesselClass: 'Panamax', vesselType: 'Bulk carrier', cargo: 'Coking coal', volumeMt: 69000, arrival: 'ETA 2026-09-11 10:00', departure: 'TBC', status: 'arriving', berth: 'Berth TBD', draft: 12.6, loa: 220, beam: 32.2, charterer: 'Deccan Steel Procurement', delayHrs: 0 },
+    { id: 'v-ha-04', name: 'Calm Horizon', imo: 'IMO 9611408', vesselClass: 'Supramax', vesselType: 'Bulk carrier', cargo: 'Fertiliser', volumeMt: 46000, arrival: '2026-09-01 07:25', departure: '2026-09-07 15:10', status: 'departing', berth: 'Sailed from HDC-1', draft: 10.9, loa: 183, beam: 32.3, charterer: 'AgriBulk India', delayHrs: 18 },
+  ],
+  Chennai: [
+    { id: 'v-ch-01', name: 'Coromandel Light', imo: 'IMO 9802339', vesselClass: 'Panamax', vesselType: 'Bulk carrier', cargo: 'Coking coal', volumeMt: 72000, arrival: '2026-09-07 05:40', departure: '2026-09-09 14:00', status: 'in_port', berth: 'Berth CQ-2 (discharging)', draft: 13.4, loa: 226, beam: 32.2, charterer: 'Deccan Steel Procurement', delayHrs: 0 },
+    { id: 'v-ch-02', name: 'Marina Breeze', imo: 'IMO 9756884', vesselClass: 'Supramax', vesselType: 'Bulk carrier', cargo: 'Gypsum', volumeMt: 47000, arrival: 'ETA 2026-09-09 21:00', departure: 'TBC', status: 'arriving', berth: 'Berth TBD', draft: 11.2, loa: 188, beam: 32.3, charterer: 'Coastal Freight Ltd.', delayHrs: 0 },
+    { id: 'v-ch-03', name: 'Eastwind Glory', imo: 'IMO 9667120', vesselClass: 'Panamax', vesselType: 'Bulk carrier', cargo: 'Iron ore', volumeMt: 70000, arrival: '2026-09-03 12:05', departure: '2026-09-08 06:50', status: 'departing', berth: 'Sailed from CQ-1', draft: 13.1, loa: 223, beam: 32.2, charterer: 'OceanBulk Carriers', delayHrs: 2 },
+  ],
+  Dhamra: [
+    { id: 'v-dh-01', name: 'Dhamra Spirit', imo: 'IMO 9785123', vesselClass: 'Capesize', vesselType: 'Bulk carrier', cargo: 'Iron ore', volumeMt: 160000, arrival: '2026-09-06 13:15', departure: '2026-09-09 22:00', status: 'in_port', berth: 'Berth D-1 (loading)', draft: 17.5, loa: 290, beam: 45, charterer: 'OceanBulk Carriers', delayHrs: 0 },
+    { id: 'v-dh-02', name: 'Sandpiper Ace', imo: 'IMO 9724516', vesselClass: 'Supramax', vesselType: 'Bulk carrier', cargo: 'Non-coking coal', volumeMt: 51000, arrival: '2026-09-05 08:00', departure: 'TBC — awaiting berth', status: 'waiting', berth: 'Anchorage D-2', draft: 11.9, loa: 187, beam: 32.3, charterer: 'Bengal Power Fuels', delayHrs: 26 },
+    { id: 'v-dh-03', name: 'Kalinga Dawn', imo: 'IMO 9840190', vesselClass: 'Panamax', vesselType: 'Bulk carrier', cargo: 'Limestone', volumeMt: 66000, arrival: 'ETA 2026-09-10 16:30', departure: 'TBC', status: 'arriving', berth: 'Berth TBD', draft: 12.8, loa: 221, beam: 32.2, charterer: 'Harbourline Logistics', delayHrs: 0 },
+  ],
+};
+
+// --- Operational alerts per port (simulated, shown beside the schedule) ---
+export const MOCK_PORT_ALERTS = {
+  Paradip: [
+    { severity: 'high', text: 'Anchorage backlog: 3 vessels waiting over 48h — consider diverting Supramax parcels to Dhamra.' },
+    { severity: 'medium', text: 'Berth CB-2 crane maintenance window 10 Sep 02:00–06:00; loading rates may dip.' },
+  ],
+  Visakhapatnam: [
+    { severity: 'medium', text: 'VQ-4 discharge running 6h behind schedule after swell delays on 06 Sep.' },
+  ],
+  Haldia: [
+    { severity: 'high', text: 'Hooghly draft restriction 8.2m until spring tide 12 Sep — Panamax arrivals must short-load.' },
+    { severity: 'medium', text: 'Sagar Roads anchorage congestion: pilot boarding delays averaging 18h.' },
+  ],
+  Chennai: [
+    { severity: 'low', text: 'No active disruptions. Next planned maintenance: CQ-1 fenders, 15 Sep.' },
+  ],
+  Dhamra: [
+    { severity: 'medium', text: 'Single Capesize berth occupied until 09 Sep — incoming Capesize parcels will queue at anchorage.' },
+  ],
+};
 
 // --- Cargo Types ---
 export const mockCargoTypes = [
@@ -979,6 +1054,56 @@ export const mockVlsfo = {
   history: mockVlsfoHistory,
 };
 
+// --- Market KPIs ---
+// Head values mirror mockBdi/mockVlsfo exactly so Pipeline Overview matches
+// the BDI and VLSFO detail pages in mock mode (same sources, same periods).
+export const mockMarketKPIs = {
+  baltic_dry_index: {
+    value: mockBdi.latest.value,
+    unit: 'points',
+    change_pct: mockBdi.latest.change_pct,
+    trend: mockBdi.latest.change_pct >= 0 ? 'up' : 'down',
+    date: mockBdi.latest.date,
+    historical: mockBdi.history,
+    components: {
+      capesize: 2840,
+      panamax: 1620,
+      supramax: 1295,
+    },
+  },
+  bunker_fuel: {
+    vlsfo_singapore: {
+      value: mockVlsfo.latest.value,
+      unit: '$/MT',
+      change_pct: mockVlsfo.latest.change_pct,
+      date: mockVlsfo.latest.date,
+      historical: mockVlsfo.history,
+    },
+    vlsfo_fujairah: {
+      value: 598,
+      unit: '$/MT',
+      change: -5,
+      change_pct: -0.8,
+    },
+    ifo380_singapore: {
+      value: 545,
+      unit: '$/MT',
+      change: -12,
+      change_pct: -2.2,
+    },
+  },
+  active_shipments: 14,
+  fleet_readiness: {
+    available_vessels: 23,
+    total_fleet: 31,
+    readiness_pct: 74.2,
+  },
+  rate_projection_90d: {
+    direction: 'up',
+    magnitude_pct: 4.8,
+  },
+};
+
 // --- Scenario Simulation ---
 export function simulateScenario(volumeMt, laycanWeeks, routeId, charterType) {
   const route = mockRoutes.find((r) => r.id === routeId) || mockRoutes[0];
@@ -990,13 +1115,24 @@ export function simulateScenario(volumeMt, laycanWeeks, routeId, charterType) {
   const spotRate = baseRate * 1.03;
   const spotCost = volumeMt * spotRate;
 
-  // Time charter cost = hire rate * duration + bunker + port charges
-  const vesselClass = mockVesselClasses.find((vc) => vc.name === 'Capesize');
+  // Pick vessel class based on volume (mirrors backend _recommend_vessel_for_volume)
+  let vesselClass;
+  if (volumeMt <= 65000) {
+    vesselClass = mockVesselClasses.find((vc) => vc.name === 'Supramax');
+  } else if (volumeMt <= 85000) {
+    vesselClass = mockVesselClasses.find((vc) => vc.name === 'Panamax');
+  } else {
+    vesselClass = mockVesselClasses.find((vc) => vc.name === 'Capesize');
+  }
+  if (!vesselClass) vesselClass = mockVesselClasses[0];
+
+  // Time charter cost = (hire + bunker + port) × number of voyages needed
   const transitDays = route.avg_transit_days + laycanWeeks * 7;
-  const hireCost = vesselClass.daily_hire_rate * transitDays;
-  const bunkerCost = vesselClass.daily_consumption_mt * 612 * transitDays;
-  const portCharges = 45000 * 2; // load + discharge
-  const tcCost = hireCost + bunkerCost + portCharges;
+  const voyages = Math.max(1, Math.ceil(volumeMt / vesselClass.dwt));
+  const hireCostPerVoyage = vesselClass.daily_hire_rate * transitDays;
+  const bunkerCostPerVoyage = vesselClass.daily_consumption_mt * 612 * transitDays;
+  const portChargesPerVoyage = 45000 * 2; // load + discharge
+  const tcCost = (hireCostPerVoyage + bunkerCostPerVoyage + portChargesPerVoyage) * voyages;
 
   const savings = charterType === 'spot' ? spotCost - tcCost : tcCost - spotCost;
   const savingsPct = charterType === 'spot'
@@ -1012,9 +1148,10 @@ export function simulateScenario(volumeMt, laycanWeeks, routeId, charterType) {
     time_charter: {
       hire_rate: vesselClass.daily_hire_rate,
       duration_days: transitDays,
-      hire_cost: Math.round(hireCost),
-      bunker_cost: Math.round(bunkerCost),
-      port_charges: portCharges,
+      voyages,
+      hire_cost: Math.round(hireCostPerVoyage * voyages),
+      bunker_cost: Math.round(bunkerCostPerVoyage * voyages),
+      port_charges: portChargesPerVoyage * voyages,
       total_cost: Math.round(tcCost),
       cost_per_mt: Math.round((tcCost / volumeMt) * 100) / 100,
     },

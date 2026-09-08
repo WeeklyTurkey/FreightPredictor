@@ -12,8 +12,7 @@ import {
 } from 'recharts';
 import Navbar from './Navbar';
 import MetricCard from './MetricCard';
-
-const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA === 'true';
+import { MARKET_PERIODS, filterHistoryByPeriod } from '../api/freightService';
 
 const formatTick = (dateStr) => {
   const d = new Date(dateStr);
@@ -47,6 +46,9 @@ export default function MarketPricePage({
   const [latest, setLatest] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState('ALL');
+
+  const visibleHistory = filterHistoryByPeriod(history, period);
 
   useEffect(() => {
     Promise.all([fetchLatest(), fetchHistory()]).then(([latestData, historyData]) => {
@@ -64,8 +66,6 @@ export default function MarketPricePage({
           maximumFractionDigits: decimals,
         })}${valueSuffix}`;
 
-  const showingFallback =
-    !USE_MOCK && latest && latest.source && latest.source !== 'oilpriceapi';
   const isEmpty = !loading && history.length === 0;
 
   return (
@@ -73,7 +73,7 @@ export default function MarketPricePage({
       <Navbar />
       <main className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6">
         <Link
-          to="/"
+          to="/dashboard"
           className="inline-flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 font-medium mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Pipeline Overview
@@ -100,36 +100,40 @@ export default function MarketPricePage({
                 unit={unit}
                 changePct={latest?.change_pct ?? undefined}
                 trend={latest?.change_pct == null ? 'flat' : latest.change_pct >= 0 ? 'up' : 'down'}
-                subtitle={
-                  latest?.date
-                    ? `As of ${latest.date} · ${latest.source === 'oilpriceapi' ? 'Live' : 'Stored'}`
-                    : 'No data'
-                }
+                subtitle={latest?.date ? `As of ${latest.date}` : 'No data'}
                 disableGraph={true}
               />
             </div>
 
-            {showingFallback && (
-              <div className="card p-4 mb-6 border-amber-200 bg-amber-50/60">
-                <p className="text-xs text-amber-700">
-                  Live feed unavailable — showing stored fallback data. Run
-                  {' '}<code className="font-mono">python manage.py fetch_market_prices</code>{' '}
-                  with <code className="font-mono">OILPRICEAPI_TOKEN</code> set to refresh.
-                </p>
-              </div>
-            )}
-
             <div className="card p-5">
-              <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-                Daily history
-              </h3>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                  Daily history
+                </h3>
+                <div className="flex gap-1.5" role="group" aria-label="History period">
+                  {MARKET_PERIODS.map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => setPeriod(opt)}
+                      aria-pressed={period === opt}
+                      className={`px-3 py-1 text-xs font-bold border transition-all focus-visible:outline-2 focus-visible:outline-teal-500 ${
+                        period === opt
+                          ? 'border-teal-600 bg-teal-600 text-white'
+                          : 'border-slate-200 bg-white text-slate-500 hover:border-teal-300 hover:text-teal-700'
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {isEmpty ? (
                 <div className="flex items-center justify-center h-64 text-sm text-slate-400">
                   No historical values available yet.
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={340}>
-                  <LineChart data={history} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
+                  <LineChart data={visibleHistory} margin={{ top: 10, right: 20, bottom: 5, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f5" />
                     <XAxis
                       dataKey="date"

@@ -1,0 +1,10 @@
+AGENTS.md
+CURRENT_STATE.md
+SKILL.md
+
+# Sensitive and generated files
+.DS_Store
+__pycache__/
+*.pyc
+.env
+db.sqlite3

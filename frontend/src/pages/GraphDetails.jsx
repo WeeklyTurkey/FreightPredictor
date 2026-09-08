@@ -139,7 +139,7 @@ export default function GraphDetails() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
-            <Link to="/" className="inline-flex items-center gap-2 text-sm font-medium text-teal-600 hover:text-teal-700 mb-4 transition-colors">
+            <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-medium text-teal-600 hover:text-teal-700 mb-4 transition-colors">
               <ArrowLeft className="w-4 h-4" /> Back to Overview
             </Link>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">

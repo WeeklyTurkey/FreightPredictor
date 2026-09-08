@@ -9,6 +9,7 @@ import {
   mockMarketKPIs,
   mockMarketTicker,
   mockPortStatus,
+  mockPorts,
   mockVesselClasses,
   mockCargoTypes,
   mockBdi,
@@ -18,6 +19,8 @@ import {
 import {
   validateSelection,
   buildRatesQuery,
+  buildGenerateBody,
+  displayCommodity,
   emptyShape,
 } from './forecastParams';
 
@@ -69,7 +72,13 @@ export const getRoutes = async () => {
         origin_country: r.origin_country || r.origin_port?.country || mockFallback.origin_country || 'Global',
         distance_nm: r.distance_nautical_miles || mockFallback.distance_nm || 3500,
         avg_transit_days: r.typical_transit_days || mockFallback.avg_transit_days || 14,
-        primary_cargo: mockFallback.primary_cargo || 'Coking Coal',
+        // Cargo served on this route comes from backend history data
+        // (RouteListSerializer.commodities, most-served first) — never
+        // hardcoded. Mock fallback only when the backend omits the field.
+        cargoes: Array.isArray(r.commodities) && r.commodities.length > 0 ? r.commodities : null,
+        primary_cargo: (Array.isArray(r.commodities) && r.commodities.length > 0
+          ? displayCommodity(r.commodities[0])
+          : null) || mockFallback.primary_cargo || 'Coking Coal',
         current_rate: mockFallback.current_rate || 24.50,
         rate_change_pct: mockFallback.rate_change_pct || -2.4,
       };
@@ -160,10 +169,33 @@ export const getRates = async (routeId, vesselClass = 'Capesize', commodity = 'c
       return emptyShape({ routeId, vesselClass, commodityKey });
     }
 
-    const [rawRates, rawForecasts] = await Promise.all([
+    const [rawRates, initialForecasts] = await Promise.all([
       fetchAllPages('/rates/', buildRatesQuery({ numericRouteId, vesselId, commodityKey })).catch(() => []),
       fetchAllPages('/forecasts/', buildRatesQuery({ numericRouteId, vesselId, commodityKey, horizonDays })).catch(() => []),
     ]);
+
+    // Automatic 90-day generation: history exists but no saved forecast rows
+    // for this exact combination → trigger one generation with the same
+    // parameters, then re-read. Server-side save is clear-then-recreate per
+    // route/vessel/commodity/horizon inside a transaction, so repeats are
+    // idempotent and never duplicate rows. A failed generation falls through
+    // to the history-only result (and its honest warning) below.
+    let rawForecasts = initialForecasts;
+    if (rawRates.length > 0 && rawForecasts.length === 0) {
+      try {
+        await apiClient.post(
+          '/forecasts/generate/',
+          buildGenerateBody({ numericRouteId, vesselId, commodityKey, horizonDays: horizonDays || 90 }),
+          { timeout: 120000 },
+        );
+        rawForecasts = await fetchAllPages(
+          '/forecasts/',
+          buildRatesQuery({ numericRouteId, vesselId, commodityKey, horizonDays }),
+        ).catch(() => []);
+      } catch (genErr) {
+        console.warn('Automatic forecast generation failed; showing history only:', genErr);
+      }
+    }
 
     // Transform historical rates
     const historical = rawRates.map((item) => {
@@ -410,6 +442,12 @@ export const getCharterers = async () => {
         total_demurrage_paid: damageIncidents * 15000,
         dispute_resolution_rate: 95,
         notes: `Track record of ${totalVoyages} voyages across global trade routes. Contact: ${c.contact_email || 'chartering@desk.com'}`,
+        // Raw scoring inputs for the trust breakdown (null when absent).
+        on_time_delivery_pct: c.on_time_delivery_pct ?? null,
+        cargo_damage_incidents: c.cargo_damage_incidents ?? null,
+        payment_reliability_pct: c.payment_reliability_pct ?? null,
+        years_in_operation: c.years_in_operation ?? null,
+        total_voyages: totalVoyages,
       };
     });
   } catch (err) {
@@ -457,22 +495,53 @@ export const getVoyages = async () => {
   return Promise.resolve(mockVoyages);
 };
 
+// --- Shared market period definitions (Overview cards + detail pages) ---
+export const MARKET_PERIODS = ['1D', '1W', '1M', 'ALL'];
+const PERIOD_DAYS = { '1D': 1, '1W': 7, '1M': 30 };
+
+// Date-based slice of a [{date, ...}] series ending at its latest point.
+// 'ALL' returns the full series. Used identically by Pipeline Overview and
+// the BDI/VLSFO detail pages so periods always mean the same thing.
+export const filterHistoryByPeriod = (history, period) => {
+  if (!Array.isArray(history) || history.length === 0) return [];
+  if (!period || period === 'ALL') return history;
+  const days = PERIOD_DAYS[period];
+  if (!days) return history;
+  const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const cutoff = new Date(sorted[sorted.length - 1].date).getTime() - days * 86400000;
+  const sliced = sorted.filter((p) => new Date(p.date).getTime() >= cutoff);
+  return sliced.length > 0 ? sliced : sorted.slice(-1);
+};
+
 // --- Market KPIs & Dashboard Summary ---
+// BDI/VLSFO head values come from the SAME helpers as the detail pages
+// (getBdiLatest/getVlsfoLatest + histories), so Overview can never drift.
 export const getMarketKPIs = async () => {
   if (USE_MOCK) return Promise.resolve(mockMarketKPIs);
   try {
-    const response = await apiClient.get('/dashboard/');
-    const data = response.data;
+    const [dashRes, bdiLatest, bdiHistory, vlsfoLatest, vlsfoHistory] = await Promise.all([
+      apiClient.get('/dashboard/').catch(() => ({ data: {} })),
+      getBdiLatest(),
+      getBdiHistory(90),
+      getVlsfoLatest(),
+      getVlsfoHistory(90),
+    ]);
+    const data = dashRes.data || {};
 
-    const bdi = data.market_indices?.find((i) => i.index_type === 'BDI') || { value: '1850', change_pct_24h: '3.2' };
     const bci = data.market_indices?.find((i) => i.index_type === 'BCI') || { value: '2980' };
-    const macro = data.macro_factors || { bunker_fuel_price_usd: '620.00' };
+    const vlsfoChange =
+      (Array.isArray(vlsfoHistory) && vlsfoHistory.length > 0
+        ? vlsfoHistory[vlsfoHistory.length - 1].change_pct
+        : null) ?? vlsfoLatest.change_pct ?? 0;
 
     return {
       baltic_dry_index: {
-        value: parseFloat(bdi.value) || 1850,
-        change_pct: parseFloat(bdi.change_pct_24h) || 3.2,
-        trend: 'up',
+        value: bdiLatest.value,
+        unit: 'points',
+        change_pct: bdiLatest.change_pct,
+        trend: bdiLatest.change_pct >= 0 ? 'up' : 'down',
+        date: bdiLatest.date,
+        historical: bdiHistory,
         components: {
           capesize: parseFloat(bci.value) || 2980,
           panamax: 1640,
@@ -481,8 +550,11 @@ export const getMarketKPIs = async () => {
       },
       bunker_fuel: {
         vlsfo_singapore: {
-          value: parseFloat(macro.bunker_fuel_price_usd) || 620.00,
-          change_pct: -1.8,
+          value: vlsfoLatest.value,
+          unit: '$/MT',
+          change_pct: vlsfoChange,
+          date: vlsfoLatest.date,
+          historical: vlsfoHistory,
         },
         vlsfo_fujairah: {
           value: 635.50,
@@ -495,7 +567,7 @@ export const getMarketKPIs = async () => {
         available_vessels: 28,
         total_fleet: 32,
       },
-      rate_projection_30d: {
+      rate_projection_90d: {
         direction: 'down',
         magnitude_pct: 3.4,
       },
@@ -530,8 +602,10 @@ export const getPortStatus = async () => {
       else if (waiting > 2) status = 'Moderate';
 
       return {
+        id: String(p.id),
         port: p.name,
         country: p.country || 'India',
+        ships_in_port: p.ships_currently_at_port ?? null,
         vessels_waiting: waiting,
         avg_wait_days: Math.round((waiting * 0.8) * 10) / 10,
         berth_utilization: Math.min(95, 60 + waiting * 7),
@@ -545,7 +619,40 @@ export const getPortStatus = async () => {
   }
 };
 
+// --- Port registry (physical limits; mirrors GET /ports/) ---
+export const getPorts = async () => {
+  if (USE_MOCK) return Promise.resolve(mockPorts);
+  try {
+    const rows = await fetchAllPages('/ports/');
+    if (!rows || rows.length === 0) return mockPorts;
+    return rows.map((p) => ({
+      id: String(p.id),
+      name: p.name,
+      country: p.country || 'India',
+      port_type: p.port_type,
+      max_draft: p.max_draft,
+      max_beam: p.max_beam,
+      max_loa: p.max_loa,
+      ships_currently_at_port: p.ships_currently_at_port,
+      expected_incoming_shipments: p.expected_incoming_shipments,
+    }));
+  } catch (err) {
+    console.warn('Backend ports call failed, using mock ports:', err);
+    return mockPorts;
+  }
+};
+
 // --- Feature C: Automated Physical Constraint & Port Feasibility Verification ---
+// Live resolution strategy (root-cause fix for the old "network error"):
+//  1. /ports/ and /vessels/ are DRF-paginated, so they are read with
+//     fetchAllPages — never `.find` on the raw envelope.
+//  2. Names are matched case-insensitively against the live registry. When a
+//     name cannot be resolved — or the registry itself is unreachable — the
+//     call throws a specific, user-facing error. It NEVER posts with
+//     hardcoded fallback IDs (the old ids 15/6 do not exist in seeded DBs,
+//     which turned every such request into a 404/network failure).
+//  3. Backend 4xx responses carry `{error: ...}`; that message is surfaced
+//     instead of a generic axios failure.
 export const checkPortFeasibility = async (destPortName, vesselClassName, volumeMt) => {
   if (USE_MOCK) {
     return Promise.resolve({
@@ -567,22 +674,90 @@ export const checkPortFeasibility = async (destPortName, vesselClassName, volume
     });
   }
 
-  const portsRes = await apiClient.get('/ports/').catch(() => ({ data: [] }));
-  const ports = unwrapDRF(portsRes.data);
-  const portMatch = ports.find((p) => (p.name || '').toLowerCase() === String(destPortName).toLowerCase());
-  const portId = portMatch ? portMatch.id : 15;
+  const norm = (s) => String(s || '').trim().toLowerCase();
 
-  const vesselsRes = await apiClient.get('/vessels/').catch(() => ({ data: [] }));
-  const vessels = unwrapDRF(vesselsRes.data);
-  const vesselMatch = vessels.find((v) => (v.size_class_display || v.size_class || '').toLowerCase() === String(vesselClassName).toLowerCase());
-  const vesselId = vesselMatch ? vesselMatch.id : 6;
+  let ports = null;
+  try {
+    ports = await fetchAllPages('/ports/');
+  } catch {
+    ports = null;
+  }
+  if (!ports) {
+    throw new Error(
+      'Could not load the live port registry (GET /ports/ failed). ' +
+      'Start the Django backend (python manage.py runserver 8000) and retry.',
+    );
+  }
+  const portMatch =
+    ports.find((p) => norm(p.name) === norm(destPortName) && p.port_type !== 'origin') ||
+    ports.find((p) => norm(p.name) === norm(destPortName));
+  if (!portMatch) {
+    throw new Error(
+      `Port "${destPortName}" was not found in the live port registry. ` +
+      'Pick a destination port from the Port Status list.',
+    );
+  }
 
-  const response = await apiClient.post('/port-feasibility/', {
-    destination_port_id: portId,
-    vessel_class_id: vesselId,
-    volume_mt: parseFloat(volumeMt),
-  });
+  let vessels = null;
+  try {
+    vessels = await fetchAllPages('/vessels/');
+  } catch {
+    vessels = null;
+  }
+  if (!vessels) {
+    throw new Error(
+      'Could not load the live vessel registry (GET /vessels/ failed). ' +
+      'Start the Django backend (python manage.py runserver 8000) and retry.',
+    );
+  }
+  const vesselMatch = vessels.find(
+    (v) => norm(v.size_class_display || v.size_class) === norm(vesselClassName),
+  );
+  if (!vesselMatch) {
+    throw new Error(
+      `Vessel class "${vesselClassName}" was not found in the live vessel registry. ` +
+      'Choose one of the offered vessel classes.',
+    );
+  }
+
+  let response;
+  try {
+    response = await apiClient.post('/port-feasibility/', {
+      destination_port_id: portMatch.id,
+      vessel_class_id: vesselMatch.id,
+      volume_mt: parseFloat(volumeMt),
+    });
+  } catch (err) {
+    const serverMsg = err?.response?.data?.error;
+    if (serverMsg) throw new Error(serverMsg);
+    if (err?.response?.status === 404) {
+      throw new Error(
+        'Port feasibility endpoint returned 404 — the selected port or vessel no longer exists in backend reference data.',
+      );
+    }
+    throw new Error(
+      'Port feasibility request failed: backend unreachable. ' +
+      'Start the Django backend (python manage.py runserver 8000) and retry.',
+    );
+  }
   return response.data;
+};
+
+// --- Simulated vessel schedule (per-port ship activity) ---
+// There is no live AIS/vessel-schedule endpoint on the backend, so ship
+// activity is served from bundled simulated data in BOTH modes. The
+// `simulated: true` flag must be surfaced in the UI ("Simulated" badge) so
+// mocked movements are never mistaken for live operational data.
+export const getVesselSchedule = async (portName) => {
+  const { MOCK_VESSEL_SCHEDULE, MOCK_SCHEDULE_UPDATED } = await import('./mockData');
+  const vessels = (MOCK_VESSEL_SCHEDULE[portName] || []).map((v) => ({ ...v }));
+  return Promise.resolve({
+    port: portName,
+    vessels,
+    simulated: true,
+    source: 'Simulated schedule — illustrative planning data, not a live feed',
+    updated: MOCK_SCHEDULE_UPDATED,
+  });
 };
 
 // --- Feature D: Calculate Detailed Itemised Landed Cost ---
@@ -666,30 +841,63 @@ export const runSimulation = async (volumeMt, laycanWeeks, routeId, charterType)
     });
 
     const rec = recRes.data;
-    const spotRate = 24.50;
-    const tcRate = 22.80;
+
+    // Fetch route info for transit days
+    let transitDays = 25; // sensible default
+    try {
+      const routeRes = await apiClient.get(`/routes/${parseInt(routeId, 10) || 1}/`);
+      transitDays = (routeRes.data.avg_transit_days || 25) + laycanWeeks * 7;
+    } catch { /* keep default */ }
+
+    // Pick vessel economics based on volume (mirrors backend logic)
+    let dailyHire, dailyConsumption, vesselDwt;
+    if (volumeMt <= 65000) {
+      dailyHire = 12000; dailyConsumption = 28; vesselDwt = 55000;   // Supramax
+    } else if (volumeMt <= 85000) {
+      dailyHire = 16500; dailyConsumption = 38; vesselDwt = 75000;   // Panamax
+    } else {
+      dailyHire = 28000; dailyConsumption = 55; vesselDwt = 180000;  // Capesize
+    }
+
+    // Spot: derive from recommendation's rationale or use a sensible estimate
+    // The recommendation API returns signal + financial_impact but not the rate directly,
+    // so we pull the latest rate from the rates endpoint as a fallback.
+    let currentRate = 24.50;
+    try {
+      const ratesRes = await apiClient.get('/rates/', { params: { route: parseInt(routeId, 10) || 1, page_size: 1, ordering: '-date' } });
+      const latestRate = ratesRes.data?.results?.[0];
+      if (latestRate?.rate_usd_per_ton) currentRate = parseFloat(latestRate.rate_usd_per_ton);
+    } catch { /* keep default */ }
+
+    const spotRate = currentRate * 1.03;
     const spotTotal = volumeMt * spotRate;
-    const tcTotal = volumeMt * tcRate;
+
+    // Time charter: operational cost × voyages needed
+    const voyages = Math.max(1, Math.ceil(volumeMt / vesselDwt));
+    const hireCost = dailyHire * transitDays * voyages;
+    const bunkerCost = dailyConsumption * 612 * transitDays * voyages;
+    const portCharges = 45000 * 2 * voyages;
+    const tcTotal = hireCost + bunkerCost + portCharges;
+
     const savings = Math.abs(spotTotal - tcTotal);
 
     return {
       recommended: rec.signal === 'BUY_NOW' ? 'spot' : 'time_charter',
       spot: {
-        rate: spotRate,
-        total_cost: spotTotal,
-        cost_per_mt: spotRate,
+        rate: Math.round(spotRate * 100) / 100,
+        total_cost: Math.round(spotTotal),
+        cost_per_mt: Math.round(spotRate * 100) / 100,
       },
       time_charter: {
-        rate: tcRate,
-        hire_cost: tcTotal * 0.7,
-        bunker_cost: tcTotal * 0.2,
-        port_charges: tcTotal * 0.1,
-        total_cost: tcTotal,
-        cost_per_mt: tcRate,
+        hire_cost: Math.round(hireCost),
+        bunker_cost: Math.round(bunkerCost),
+        port_charges: Math.round(portCharges),
+        total_cost: Math.round(tcTotal),
+        cost_per_mt: Math.round((tcTotal / volumeMt) * 100) / 100,
       },
-      savings,
-      savings_pct: Math.round((savings / spotTotal) * 1000) / 10,
-      projected_rate_30d: 23.20,
+      savings: Math.round(savings),
+      savings_pct: Math.round((savings / Math.max(spotTotal, tcTotal)) * 1000) / 10,
+      projected_rate_30d: currentRate * 1.02,
     };
   } catch (err) {
     return simulateScenario(volumeMt, laycanWeeks, routeId, charterType);
@@ -716,10 +924,11 @@ export const getBdiLatest = async () => {
   }
 };
 
-export const getBdiHistory = async (days = 90) => {
+// Generic index history backing both getBdiHistory and the index-graph page.
+export const getMarketIndexHistory = async (indexType = 'BDI', days = 90) => {
   if (USE_MOCK) return Promise.resolve(mockBdi.history);
   try {
-    const rows = await fetchAllPages('/market-indices/', { index_type: 'BDI' });
+    const rows = await fetchAllPages('/market-indices/', { index_type: indexType });
     const series = rows
       .map((r) => ({
         date: r.date,
@@ -735,28 +944,11 @@ export const getBdiHistory = async (days = 90) => {
   }
 };
 
-// --- VLSFO (live BunkerFuelPrice, mock fallback) ---
-export const getVlsfoLatest = async () => {
-  if (USE_MOCK) return Promise.resolve(mockVlsfo.latest);
-  try {
-    const response = await apiClient.get('/bunker-fuel-prices/latest/');
-    const data = response.data || {};
-    if (!data.marine_gas_oil_usd) return mockVlsfo.latest;
-    return {
-      value: parseFloat(data.marine_gas_oil_usd) || 0,
-      unit: '$/MT',
-      currency: 'USD',
-      change_pct: null,
-      date: data.date || '',
-      source: data.source || 'synthetic',
-    };
-  } catch (err) {
-    console.warn('Backend VLSFO latest call failed, using mock VLSFO:', err);
-    return mockVlsfo.latest;
-  }
-};
+export const getBdiHistory = async (days = 90) => getMarketIndexHistory('BDI', days);
 
-export const getVlsfoHistory = async (days = 90) => {
+// --- VLSFO (live BunkerFuelPrice, mock fallback) ---
+// Generic bunker history backing both getVlsfoHistory and the index-graph page.
+export const getBunkerFuelHistory = async (days = 90) => {
   if (USE_MOCK) return Promise.resolve(mockVlsfo.history);
   try {
     const rows = await fetchAllPages('/bunker-fuel-prices/');
@@ -781,3 +973,25 @@ export const getVlsfoHistory = async (days = 90) => {
     return mockVlsfo.history;
   }
 };
+
+export const getVlsfoLatest = async () => {
+  if (USE_MOCK) return Promise.resolve(mockVlsfo.latest);
+  try {
+    const response = await apiClient.get('/bunker-fuel-prices/latest/');
+    const data = response.data || {};
+    if (!data.marine_gas_oil_usd) return mockVlsfo.latest;
+    return {
+      value: parseFloat(data.marine_gas_oil_usd) || 0,
+      unit: '$/MT',
+      currency: 'USD',
+      change_pct: null,
+      date: data.date || '',
+      source: data.source || 'synthetic',
+    };
+  } catch (err) {
+    console.warn('Backend VLSFO latest call failed, using mock VLSFO:', err);
+    return mockVlsfo.latest;
+  }
+};
+
+export const getVlsfoHistory = async (days = 90) => getBunkerFuelHistory(days);
