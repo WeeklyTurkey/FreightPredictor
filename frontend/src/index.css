@@ -26,7 +26,7 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 0.875rem;
+    border-radius: 0;
     box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
     transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   }
@@ -41,13 +41,13 @@
   }
 
   .btn-primary {
-    @apply bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-sm;
+    @apply bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2 transition-all duration-200 shadow-sm;
   }
   .btn-secondary {
-    @apply bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded-lg transition-all duration-200;
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-2 transition-all duration-200;
   }
   .input-field {
-    @apply bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-lg px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 focus:bg-white/90 transition-all duration-200;
+    @apply bg-white/60 backdrop-blur-md border border-white/60 shadow-sm px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 focus:bg-white/90 transition-all duration-200;
   }
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;

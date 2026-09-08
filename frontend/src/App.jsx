@@ -10,28 +10,28 @@ import ScenarioSimulator from './pages/ScenarioSimulator';
 import Charterers from './pages/Charterers';
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Dashboard Pages */}
-        <Route path="/" element={<Overview />} />
-        <Route path="/voyages" element={<ActiveVoyages />} />
-        <Route path="/ports" element={<PortStatus />} />
-        <Route path="/fleet" element={<FleetReadiness />} />
+ return (
+ <BrowserRouter>
+ <Routes>
+ {/* Dashboard Pages */}
+ <Route path="/" element={<Overview />} />
+ <Route path="/voyages" element={<ActiveVoyages />} />
+ <Route path="/ports" element={<PortStatus />} />
+ <Route path="/fleet" element={<FleetReadiness />} />
 
-        {/* Rate Trends Pages */}
-        <Route path="/rates/forecast" element={<RateForecast />} />
-        <Route path="/rates/breakdown" element={<RateBreakdown />} />
+ {/* Rate Trends Pages */}
+ <Route path="/rates/forecast" element={<RateForecast />} />
+ <Route path="/rates/breakdown" element={<RateBreakdown />} />
 
-        {/* Recommendations Pages */}
-        <Route path="/recommendations/picks" element={<TopRecommendations />} />
-        <Route path="/recommendations/simulator" element={<ScenarioSimulator />} />
+ {/* Recommendations Pages */}
+ <Route path="/recommendations/picks" element={<TopRecommendations />} />
+ <Route path="/recommendations/simulator" element={<ScenarioSimulator />} />
 
-        {/* Charterers Page (kept intact for now) */}
-        <Route path="/charterers" element={<Charterers />} />
-      </Routes>
-    </BrowserRouter>
-  );
+ {/* Charterers Page (kept intact for now) */}
+ <Route path="/charterers" element={<Charterers />} />
+ </Routes>
+ </BrowserRouter>
+ );
 }
 
 export default App;
